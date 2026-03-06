@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { deals, workspaceSettings } from "@/drizzle/schema";
@@ -81,6 +82,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
+  revalidateTag("deals"); revalidateTag("dashboard");
   return NextResponse.json(row);
 }
 
@@ -90,5 +92,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   await db.delete(deals).where(eq(deals.id, id));
+  revalidateTag("deals"); revalidateTag("dashboard");
   return NextResponse.json({ ok: true });
 }

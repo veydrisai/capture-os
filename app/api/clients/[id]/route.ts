@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clients } from "@/drizzle/schema";
@@ -39,6 +40,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [row] = await db.update(clients).set(updates as any).where(eq(clients.id, id)).returning();
+  revalidateTag("clients"); revalidateTag("dashboard");
   return NextResponse.json(row);
 }
 
@@ -48,5 +50,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   await db.delete(clients).where(eq(clients.id, id));
+  revalidateTag("clients"); revalidateTag("dashboard");
   return NextResponse.json({ ok: true });
 }

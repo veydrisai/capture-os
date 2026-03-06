@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { contacts } from "@/drizzle/schema";
@@ -30,5 +31,6 @@ export async function POST(req: Request) {
     createdBy: session.user.id,
   }).returning();
 
+  revalidateTag("contacts");
   return NextResponse.json(row, { status: 201 });
 }

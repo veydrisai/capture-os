@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { activities } from "@/drizzle/schema";
@@ -31,5 +32,6 @@ export async function POST(req: Request) {
     })
     .returning();
 
+  revalidateTag("activities"); revalidateTag("dashboard");
   return NextResponse.json(row, { status: 201 });
 }
