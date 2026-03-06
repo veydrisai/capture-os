@@ -37,7 +37,7 @@ body {
   height: 70%;
   background: radial-gradient(ellipse, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
   filter: blur(80px);
-  animation: drift1 20s ease-in-out infinite alternate;
+  animation: drift1 60s ease-in-out infinite alternate;
 }
 
 .bg-scene::after {
@@ -49,7 +49,7 @@ body {
   height: 65%;
   background: radial-gradient(ellipse, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
   filter: blur(80px);
-  animation: drift2 25s ease-in-out infinite alternate;
+  animation: drift2 75s ease-in-out infinite alternate;
 }
 
 .bg-orb-3 {
@@ -61,7 +61,7 @@ body {
   height: 50%;
   background: radial-gradient(ellipse, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
   filter: blur(60px);
-  animation: drift3 18s ease-in-out infinite alternate;
+  animation: drift3 50s ease-in-out infinite alternate;
 }
 
 .bg-orb-4 {
@@ -72,7 +72,7 @@ body {
   height: 30%;
   background: radial-gradient(ellipse, rgba(244, 63, 94, 0.12) 0%, transparent 70%);
   filter: blur(50px);
-  animation: drift4 22s ease-in-out infinite alternate;
+  animation: drift4 65s ease-in-out infinite alternate;
 }
 
 @keyframes drift1 {
@@ -151,6 +151,7 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.08),
     0 8px 40px rgba(0, 0, 0, 0.35),
     0 2px 4px rgba(0, 0, 0, 0.2);
+  contain: layout style;
 }
 
 /* Sidebar glass */
