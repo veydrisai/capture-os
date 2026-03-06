@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     .from(accounts)
     .where(and(eq(accounts.userId, session.user.id), eq(accounts.provider, "google")));
 
-  if (!account?.accessToken) {
+  if (!account?.access_token) {
     return NextResponse.json({ items: [] });
   }
 
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   url.searchParams.set("maxResults", "100");
 
   const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${account.accessToken}` },
+    headers: { Authorization: `Bearer ${account.access_token}` },
   });
 
   if (!res.ok) {

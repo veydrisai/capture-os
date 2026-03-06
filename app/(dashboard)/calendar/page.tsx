@@ -9,7 +9,7 @@ async function getAccessToken(userId: string) {
     .select()
     .from(accounts)
     .where(and(eq(accounts.userId, userId), eq(accounts.provider, "google")));
-  return account?.accessToken ?? null;
+  return account?.access_token ?? null;
 }
 
 export default async function CalendarPage() {

@@ -14,10 +14,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const [row] = await db
     .update(leads)
     .set({
-      title: body.title,
+      firstName: body.firstName,
+      lastName: body.lastName || "",
+      email: body.email || null,
+      phone: body.phone || null,
+      company: body.company || null,
       status: body.status,
       source: body.source || null,
-      value: body.value ? parseInt(body.value) : 0,
+      industry: body.industry || null,
+      estimatedValue: body.estimatedValue ? parseInt(body.estimatedValue) : 0,
+      systemInterest: body.systemInterest || null,
       notes: body.notes || null,
       updatedAt: new Date(),
     })

@@ -1,25 +1,21 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { deals, clients, activities } from "@/drizzle/schema";
-import { count, eq, sql, gte } from "drizzle-orm";
-import DashboardClient from "./DashboardClient";
+import { leads, deals, clients, activities } from "@/drizzle/schema";
+import { count, eq, sql, gte, and } from "drizzle-orm";
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 17) return "afternoon";
-  return "evening";
-}
-
-export default async function DashboardPage() {
+export async function GET() {
   const session = await auth();
-  const firstName = session?.user?.name?.split(" ")[0] ?? "there";
-  const greeting = getGreeting();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const now = new Date();
+
+  // Start of current week (Monday)
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
   weekStart.setHours(0, 0, 0, 0);
+
+  // Start of current month
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const [
@@ -42,16 +38,17 @@ export default async function DashboardPage() {
     db.select().from(activities).orderBy(sql`${activities.createdAt} DESC`).limit(8),
   ]);
 
-  const stats = {
-    demosBooked: demosBooked.count,
-    demosDone: demosDone.count,
-    agreementsSigned: agreementsSigned.count,
-    clientsLive: clientsLive.count,
-    mrr: mrrResult.total ?? 0,
-    pipelineValue: pipelineValue.total ?? 0,
-    recentDeals,
-    recentActivities,
-  };
-
-  return <DashboardClient firstName={firstName} stats={stats as Parameters<typeof DashboardClient>[0]["stats"]} greeting={greeting} />;
+  return NextResponse.json(
+    {
+      demosBooked: demosBooked.count,
+      demosDone: demosDone.count,
+      agreementsSigned: agreementsSigned.count,
+      clientsLive: clientsLive.count,
+      mrr: mrrResult.total ?? 0,
+      pipelineValue: pipelineValue.total ?? 0,
+      recentDeals,
+      recentActivities,
+    },
+    { headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" } }
+  );
 }

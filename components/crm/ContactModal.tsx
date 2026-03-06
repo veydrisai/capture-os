@@ -10,6 +10,7 @@ interface Contact {
   email: string | null;
   phone: string | null;
   title: string | null;
+  company: string | null;
   type: string;
 }
 
@@ -26,6 +27,7 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
     email: contact?.email ?? "",
     phone: contact?.phone ?? "",
     title: contact?.title ?? "",
+    company: contact?.company ?? "",
     type: contact?.type ?? "lead",
   });
   const [saving, setSaving] = useState(false);
@@ -43,7 +45,7 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, company: form.company || null }),
       });
       if (!res.ok) throw new Error(await res.text());
       onSaved();
@@ -98,6 +100,7 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
           </div>
           <Field label="Email" value={form.email} onChange={(v) => update("email", v)} type="email" />
           <Field label="Phone" value={form.phone} onChange={(v) => update("phone", v)} type="tel" />
+          <Field label="Company" value={form.company} onChange={(v) => update("company", v)} />
           <Field label="Title / Role" value={form.title} onChange={(v) => update("title", v)} />
 
           <div>
@@ -119,9 +122,9 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
               }}
             >
               <option value="lead">Lead</option>
-              <option value="customer">Customer</option>
+              <option value="prospect">Prospect</option>
+              <option value="client">Client</option>
               <option value="partner">Partner</option>
-              <option value="vendor">Vendor</option>
             </select>
           </div>
 

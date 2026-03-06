@@ -9,14 +9,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <SessionProvider session={session}>
-      <div style={{ display: "flex", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar user={session.user} />
         <main
           style={{
             flex: 1,
-            marginLeft: 220,
+            marginLeft: 224,
             minHeight: "100vh",
-            padding: "32px 36px",
+            padding: "36px 40px",
           }}
         >
           {children}

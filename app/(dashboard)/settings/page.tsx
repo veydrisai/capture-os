@@ -1,8 +1,54 @@
-import { auth } from "@/lib/auth";
+"use client";
 
-export default async function SettingsPage() {
-  const session = await auth();
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { Save } from "lucide-react";
+
+interface WorkspaceSettings {
+  makeWebhookUrl: string | null;
+  agreementTemplateUrl: string | null;
+  intakeFormUrl: string | null;
+}
+
+export default function SettingsPage() {
+  const { data: session } = useSession();
   const user = session?.user;
+
+  const [ws, setWs] = useState<WorkspaceSettings>({
+    makeWebhookUrl: "",
+    agreementTemplateUrl: "",
+    intakeFormUrl: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/workspace-settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: WorkspaceSettings | null) => {
+        if (!data) return;
+        setWs({
+          makeWebhookUrl: data.makeWebhookUrl ?? "",
+          agreementTemplateUrl: data.agreementTemplateUrl ?? "",
+          intakeFormUrl: data.intakeFormUrl ?? "",
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setSaved(false);
+    await fetch("/api/workspace-settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(ws),
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  }
 
   return (
     <div className="animate-fade-up">
@@ -36,6 +82,46 @@ export default async function SettingsPage() {
           </p>
         </div>
 
+        {/* Workspace Settings */}
+        <div className="glass" style={{ padding: 24 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: "white", marginBottom: 20 }}>Workspace</h2>
+          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <SettingField
+              label="Make.com Webhook URL"
+              hint="Fires when a deal reaches agreement_signed or onboarding_status → live"
+              value={ws.makeWebhookUrl ?? ""}
+              onChange={(v) => setWs((s) => ({ ...s, makeWebhookUrl: v }))}
+              placeholder="https://hook.us1.make.com/..."
+            />
+            <SettingField
+              label="Agreement Template URL"
+              hint="DocuSign or PandaDoc link used in Play C"
+              value={ws.agreementTemplateUrl ?? ""}
+              onChange={(v) => setWs((s) => ({ ...s, agreementTemplateUrl: v }))}
+              placeholder="https://app.pandadoc.com/..."
+            />
+            <SettingField
+              label="Intake Form URL"
+              hint="Google Form or Typeform sent to new clients during onboarding"
+              value={ws.intakeFormUrl ?? ""}
+              onChange={(v) => setWs((s) => ({ ...s, intakeFormUrl: v }))}
+              placeholder="https://forms.gle/..."
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 4 }}>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}
+              >
+                <Save size={13} /> {saving ? "Saving..." : "Save Settings"}
+              </button>
+              {saved && (
+                <span style={{ fontSize: 12, color: "#86efac" }}>Saved ✓</span>
+              )}
+            </div>
+          </form>
+        </div>
+
         {/* Integrations */}
         <div className="glass" style={{ padding: 24 }}>
           <h2 style={{ fontSize: 14, fontWeight: 600, color: "white", marginBottom: 20 }}>Integrations</h2>
@@ -60,6 +146,31 @@ export default async function SettingsPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SettingField({
+  label, hint, value, onChange, placeholder,
+}: {
+  label: string; hint: string; value: string;
+  onChange: (v: string) => void; placeholder: string;
+}) {
+  return (
+    <div>
+      <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.55)", marginBottom: 4 }}>
+        {label}
+      </label>
+      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", marginBottom: 7 }}>{hint}</p>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }}
+        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
+        onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
+      />
     </div>
   );
 }

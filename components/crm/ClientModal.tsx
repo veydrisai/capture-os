@@ -1,0 +1,282 @@
+"use client";
+
+import { useState } from "react";
+import { X, Check } from "lucide-react";
+
+interface Client {
+  id: string;
+  businessName: string;
+  systemType: string | null;
+  onboardingStatus: string;
+  intakeFormSent: boolean;
+  intakeFormComplete: boolean;
+  complianceReviewed: boolean;
+  complianceApproved: boolean;
+  accountsChecklist: boolean;
+  kickoffScheduled: boolean;
+  kickoffDone: boolean;
+  buildComplete: boolean;
+  testingComplete: boolean;
+  softLaunchDone: boolean;
+  goLiveDate: string | null;
+  twilioAccountSid: string | null;
+  vapiAssistantId: string | null;
+  makeWebhookUrl: string | null;
+  roiDashboardUrl: string | null;
+  monthlyRetainer: number;
+  nextBillingDate: string | null;
+  complianceNotes: string | null;
+  notes: string | null;
+}
+
+interface Props {
+  client: Client | null;
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+const ONBOARDING_STATUSES = [
+  { key: "pending",             label: "Pending" },
+  { key: "intake_sent",         label: "Intake Sent" },
+  { key: "intake_complete",     label: "Intake Complete" },
+  { key: "compliance_review",   label: "Compliance Review" },
+  { key: "compliance_approved", label: "Compliance Approved" },
+  { key: "building",            label: "Building" },
+  { key: "testing",             label: "Testing" },
+  { key: "soft_launch",         label: "Soft Launch" },
+  { key: "live",                label: "Live" },
+];
+
+const SYSTEM_TYPES = [
+  { key: "", label: "None" },
+  { key: "reactivation", label: "Reactivation" },
+  { key: "hot_lead",     label: "Hot Lead" },
+  { key: "backend",      label: "Backend" },
+  { key: "combo",        label: "Combo" },
+];
+
+function toDateInput(val: string | null | undefined) {
+  if (!val) return "";
+  return val.split("T")[0];
+}
+
+const CHECKLIST = [
+  { key: "intakeFormSent",      label: "Intake Form Sent" },
+  { key: "intakeFormComplete",  label: "Intake Form Complete" },
+  { key: "complianceReviewed",  label: "Compliance Reviewed" },
+  { key: "complianceApproved",  label: "Compliance Approved" },
+  { key: "accountsChecklist",   label: "Accounts Set Up (Twilio/VAPI/Make)" },
+  { key: "kickoffScheduled",    label: "Kickoff Scheduled" },
+  { key: "kickoffDone",         label: "Kickoff Done" },
+  { key: "buildComplete",       label: "Build Complete" },
+  { key: "testingComplete",     label: "Testing Complete" },
+  { key: "softLaunchDone",      label: "Soft Launch Done" },
+];
+
+export default function ClientModal({ client, onClose, onSaved }: Props) {
+  const [form, setForm] = useState({
+    businessName: client?.businessName ?? "",
+    systemType: client?.systemType ?? "",
+    onboardingStatus: client?.onboardingStatus ?? "pending",
+    monthlyRetainer: client?.monthlyRetainer?.toString() ?? "",
+    goLiveDate: toDateInput(client?.goLiveDate),
+    nextBillingDate: toDateInput(client?.nextBillingDate),
+    twilioAccountSid: client?.twilioAccountSid ?? "",
+    vapiAssistantId: client?.vapiAssistantId ?? "",
+    makeWebhookUrl: client?.makeWebhookUrl ?? "",
+    roiDashboardUrl: client?.roiDashboardUrl ?? "",
+    complianceNotes: client?.complianceNotes ?? "",
+    notes: client?.notes ?? "",
+    // Checklist booleans
+    intakeFormSent: client?.intakeFormSent ?? false,
+    intakeFormComplete: client?.intakeFormComplete ?? false,
+    complianceReviewed: client?.complianceReviewed ?? false,
+    complianceApproved: client?.complianceApproved ?? false,
+    accountsChecklist: client?.accountsChecklist ?? false,
+    kickoffScheduled: client?.kickoffScheduled ?? false,
+    kickoffDone: client?.kickoffDone ?? false,
+    buildComplete: client?.buildComplete ?? false,
+    testingComplete: client?.testingComplete ?? false,
+    softLaunchDone: client?.softLaunchDone ?? false,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const up = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const method = client ? "PATCH" : "POST";
+      const url = client ? `/api/clients/${client.id}` : "/api/clients";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!client || !confirm("Delete this client?")) return;
+    await fetch(`/api/clients/${client.id}`, { method: "DELETE" });
+    onSaved();
+  }
+
+  const completedCount = CHECKLIST.filter(({ key }) => form[key as keyof typeof form]).length;
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: "20px" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="glass-strong" style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", padding: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "white", letterSpacing: "-0.02em" }}>
+              {client ? "Edit Client" : "New Client"}
+            </h2>
+            {client && (
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
+                Onboarding: {completedCount}/{CHECKLIST.length} steps complete
+              </p>
+            )}
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Basic info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <Field label="Business Name" value={form.businessName} onChange={(v) => up("businessName", v)} required />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <SelectField label="System Type" value={form.systemType} onChange={(v) => up("systemType", v)} options={SYSTEM_TYPES} />
+              <SelectField label="Onboarding Status" value={form.onboardingStatus} onChange={(v) => up("onboardingStatus", v)} options={ONBOARDING_STATUSES} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Field label="Monthly Retainer ($)" value={form.monthlyRetainer} onChange={(v) => up("monthlyRetainer", v)} type="number" />
+              <Field label="Go-Live Date" value={form.goLiveDate} onChange={(v) => up("goLiveDate", v)} type="date" />
+            </div>
+          </div>
+
+          {/* Onboarding Checklist */}
+          <div>
+            <p style={sectionLabel}>Onboarding Checklist</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {CHECKLIST.map(({ key, label }) => {
+                const checked = Boolean(form[key as keyof typeof form]);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => up(key, !checked)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      padding: "9px 12px", borderRadius: 10,
+                      background: checked ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.04)",
+                      border: `1px solid ${checked ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.08)"}`,
+                      cursor: "pointer", textAlign: "left",
+                    }}
+                  >
+                    <div style={{
+                      width: 16, height: 16, borderRadius: 5, flexShrink: 0,
+                      background: checked ? "#22c55e" : "rgba(255,255,255,0.08)",
+                      border: `1px solid ${checked ? "#22c55e" : "rgba(255,255,255,0.15)"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      {checked && <Check size={10} color="white" strokeWidth={3} />}
+                    </div>
+                    <span style={{ fontSize: 12, color: checked ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.45)", fontWeight: checked ? 500 : 400 }}>
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Platform Details */}
+          <div>
+            <p style={sectionLabel}>Platform Details</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Field label="Twilio Account SID" value={form.twilioAccountSid} onChange={(v) => up("twilioAccountSid", v)} />
+              <Field label="VAPI Assistant ID" value={form.vapiAssistantId} onChange={(v) => up("vapiAssistantId", v)} />
+              <Field label="Make Webhook URL" value={form.makeWebhookUrl} onChange={(v) => up("makeWebhookUrl", v)} />
+              <Field label="ROI Dashboard URL" value={form.roiDashboardUrl} onChange={(v) => up("roiDashboardUrl", v)} />
+            </div>
+          </div>
+
+          {/* Billing */}
+          <div>
+            <p style={sectionLabel}>Billing</p>
+            <Field label="Next Billing Date" value={form.nextBillingDate} onChange={(v) => up("nextBillingDate", v)} type="date" />
+          </div>
+
+          {/* Notes */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div>
+              <label style={labelStyle}>Compliance Notes</label>
+              <textarea value={form.complianceNotes} onChange={(e) => up("complianceNotes", e.target.value)} rows={2} style={textareaStyle} onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")} onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")} />
+            </div>
+            <div>
+              <label style={labelStyle}>Notes</label>
+              <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={2} style={textareaStyle} onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")} onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")} />
+            </div>
+          </div>
+
+          {error && (
+            <p style={{ fontSize: 12, color: "#fca5a5", padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</p>
+          )}
+
+          <div style={{ display: "flex", gap: 10 }}>
+            {client && (
+              <button type="button" onClick={handleDelete} style={deleteBtnStyle}>Delete</button>
+            )}
+            <button type="button" onClick={onClose} style={cancelBtnStyle}>Cancel</button>
+            <button type="submit" disabled={saving} style={{ ...saveBtnStyle, opacity: saving ? 0.7 : 1, cursor: saving ? "not-allowed" : "pointer" }}>
+              {saving ? "Saving..." : client ? "Save Changes" : "Add Client"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const sectionLabel: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 };
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 };
+const inputStyle: React.CSSProperties = { width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" };
+const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical" as const, fontFamily: "inherit" };
+const deleteBtnStyle: React.CSSProperties = { padding: "9px 16px", borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#fca5a5", fontSize: 13, cursor: "pointer" };
+const cancelBtnStyle: React.CSSProperties = { flex: 1, padding: "9px 16px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)", fontSize: 13, cursor: "pointer" };
+const saveBtnStyle: React.CSSProperties = { flex: 2, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500 };
+
+function Field({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+  return (
+    <div>
+      <label style={labelStyle}>{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} style={inputStyle} onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")} onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")} />
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { key: string; label: string }[] }) {
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+        {options.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+      </select>
+    </div>
+  );
+}

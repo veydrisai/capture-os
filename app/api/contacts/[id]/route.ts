@@ -19,6 +19,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       email: body.email || null,
       phone: body.phone || null,
       title: body.title || null,
+      company: body.company || null,
       type: body.type,
       updatedAt: new Date(),
     })

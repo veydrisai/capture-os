@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { deals } from "@/drizzle/schema";
+import { clients } from "@/drizzle/schema";
 import { desc } from "drizzle-orm";
 
 export async function GET() {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const rows = await db.select().from(deals).orderBy(desc(deals.createdAt));
+  const rows = await db.select().from(clients).orderBy(desc(clients.createdAt));
   return NextResponse.json(rows, {
     headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=30" },
   });
@@ -19,16 +19,19 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const [row] = await db.insert(deals).values({
-    title: body.title,
-    stage: body.stage ?? "cold_outreach",
+  const [row] = await db.insert(clients).values({
+    businessName: body.businessName,
     systemType: body.systemType || null,
-    value: body.value ? parseInt(body.value) : 0,
-    setupFee: body.setupFee ? parseInt(body.setupFee) : 0,
+    onboardingStatus: body.onboardingStatus ?? "pending",
     monthlyRetainer: body.monthlyRetainer ? parseInt(body.monthlyRetainer) : 0,
-    probability: body.probability ? parseInt(body.probability) : 0,
-    closeDate: body.closeDate ? new Date(body.closeDate) : null,
+    goLiveDate: body.goLiveDate ? new Date(body.goLiveDate) : null,
+    nextBillingDate: body.nextBillingDate ? new Date(body.nextBillingDate) : null,
+    twilioAccountSid: body.twilioAccountSid || null,
+    vapiAssistantId: body.vapiAssistantId || null,
+    makeWebhookUrl: body.makeWebhookUrl || null,
+    roiDashboardUrl: body.roiDashboardUrl || null,
     notes: body.notes || null,
+    complianceNotes: body.complianceNotes || null,
     createdBy: session.user.id,
     assignedTo: session.user.id,
   }).returning();
