@@ -13,6 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  session: { strategy: "jwt" },
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -27,8 +28,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      session.user.id = user.id;
+    jwt({ token, user }) {
+      // On first sign-in, persist user id into the token
+      if (user?.id) token.id = user.id;
+      return token;
+    },
+    session({ session, token }) {
+      // Read user id from token (no DB hit)
+      if (token.id) session.user.id = token.id as string;
       return session;
     },
     async signIn({ user, account }) {
