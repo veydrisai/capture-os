@@ -55,11 +55,6 @@ const SYSTEM_TYPES = [
   { key: "combo",        label: "Combo" },
 ];
 
-function toDateInput(val: string | null | undefined) {
-  if (!val) return "";
-  return val.split("T")[0];
-}
-
 const CHECKLIST = [
   { key: "intakeFormSent",      label: "Intake Form Sent" },
   { key: "intakeFormComplete",  label: "Intake Form Complete" },
@@ -72,6 +67,11 @@ const CHECKLIST = [
   { key: "testingComplete",     label: "Testing Complete" },
   { key: "softLaunchDone",      label: "Soft Launch Done" },
 ];
+
+function toDateInput(val: string | null | undefined) {
+  if (!val) return "";
+  return String(val).split("T")[0];
+}
 
 export default function ClientModal({ client, onClose, onSaved }: Props) {
   const [form, setForm] = useState({
@@ -87,7 +87,6 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
     roiDashboardUrl: client?.roiDashboardUrl ?? "",
     complianceNotes: client?.complianceNotes ?? "",
     notes: client?.notes ?? "",
-    // Checklist booleans
     intakeFormSent: client?.intakeFormSent ?? false,
     intakeFormComplete: client?.intakeFormComplete ?? false,
     complianceReviewed: client?.complianceReviewed ?? false,
@@ -134,23 +133,18 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
   const completedCount = CHECKLIST.filter(({ key }) => form[key as keyof typeof form]).length;
 
   return (
-    <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: "20px" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="glass-strong" style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", padding: 28 }}>
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", padding: 28 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "white", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>
               {client ? "Edit Client" : "New Client"}
             </h2>
-            {client && (
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-                Onboarding: {completedCount}/{CHECKLIST.length} steps complete
-              </p>
-            )}
+            <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", marginTop: 2, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>
+              {client ? `Onboarding: ${completedCount}/${CHECKLIST.length} steps` : "Add to onboarding"}
+            </p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4 }}>
             <X size={18} />
           </button>
         </div>
@@ -160,8 +154,18 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <Field label="Business Name" value={form.businessName} onChange={(v) => up("businessName", v)} required />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <SelectField label="System Type" value={form.systemType} onChange={(v) => up("systemType", v)} options={SYSTEM_TYPES} />
-              <SelectField label="Onboarding Status" value={form.onboardingStatus} onChange={(v) => up("onboardingStatus", v)} options={ONBOARDING_STATUSES} />
+              <div>
+                <label className="modal-label">System Type</label>
+                <select value={form.systemType} onChange={(e) => up("systemType", e.target.value)} className="modal-select">
+                  {SYSTEM_TYPES.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="modal-label">Onboarding Status</label>
+                <select value={form.onboardingStatus} onChange={(e) => up("onboardingStatus", e.target.value)} className="modal-select">
+                  {ONBOARDING_STATUSES.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+                </select>
+              </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <Field label="Monthly Retainer ($)" value={form.monthlyRetainer} onChange={(v) => up("monthlyRetainer", v)} type="number" />
@@ -169,9 +173,9 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
             </div>
           </div>
 
-          {/* Onboarding Checklist */}
+          {/* Checklist */}
           <div>
-            <p style={sectionLabel}>Onboarding Checklist</p>
+            <p className="modal-section">Onboarding Checklist</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {CHECKLIST.map(({ key, label }) => {
                 const checked = Boolean(form[key as keyof typeof form]);
@@ -181,22 +185,23 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
                     type="button"
                     onClick={() => up(key, !checked)}
                     style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "9px 12px", borderRadius: 10,
-                      background: checked ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.04)",
-                      border: `1px solid ${checked ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.08)"}`,
+                      display: "flex", alignItems: "center", gap: 10,
+                      padding: "10px 12px", borderRadius: 11,
+                      background: checked ? "rgba(34,197,94,0.1)" : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${checked ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.07)"}`,
                       cursor: "pointer", textAlign: "left",
+                      transition: "background 0.12s ease, border-color 0.12s ease",
                     }}
                   >
                     <div style={{
-                      width: 16, height: 16, borderRadius: 5, flexShrink: 0,
-                      background: checked ? "#22c55e" : "rgba(255,255,255,0.08)",
-                      border: `1px solid ${checked ? "#22c55e" : "rgba(255,255,255,0.15)"}`,
+                      width: 17, height: 17, borderRadius: 5, flexShrink: 0,
+                      background: checked ? "#22c55e" : "rgba(255,255,255,0.06)",
+                      border: `1px solid ${checked ? "#22c55e" : "rgba(255,255,255,0.12)"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
                       {checked && <Check size={10} color="white" strokeWidth={3} />}
                     </div>
-                    <span style={{ fontSize: 12, color: checked ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.45)", fontWeight: checked ? 500 : 400 }}>
+                    <span style={{ fontSize: 12, color: checked ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.4)", fontWeight: checked ? 500 : 400 }}>
                       {label}
                     </span>
                   </button>
@@ -207,7 +212,7 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
 
           {/* Platform Details */}
           <div>
-            <p style={sectionLabel}>Platform Details</p>
+            <p className="modal-section">Platform Details</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Field label="Twilio Account SID" value={form.twilioAccountSid} onChange={(v) => up("twilioAccountSid", v)} />
               <Field label="VAPI Assistant ID" value={form.vapiAssistantId} onChange={(v) => up("vapiAssistantId", v)} />
@@ -218,32 +223,30 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
 
           {/* Billing */}
           <div>
-            <p style={sectionLabel}>Billing</p>
+            <p className="modal-section">Billing</p>
             <Field label="Next Billing Date" value={form.nextBillingDate} onChange={(v) => up("nextBillingDate", v)} type="date" />
           </div>
 
           {/* Notes */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div>
-              <label style={labelStyle}>Compliance Notes</label>
-              <textarea value={form.complianceNotes} onChange={(e) => up("complianceNotes", e.target.value)} rows={2} style={textareaStyle} onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")} onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")} />
+              <label className="modal-label">Compliance Notes</label>
+              <textarea value={form.complianceNotes} onChange={(e) => up("complianceNotes", e.target.value)} rows={2} className="modal-textarea" />
             </div>
             <div>
-              <label style={labelStyle}>Notes</label>
-              <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={2} style={textareaStyle} onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")} onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")} />
+              <label className="modal-label">Notes</label>
+              <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={2} className="modal-textarea" />
             </div>
           </div>
 
           {error && (
-            <p style={{ fontSize: 12, color: "#fca5a5", padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</p>
+            <p style={{ fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10 }}>{error}</p>
           )}
 
           <div style={{ display: "flex", gap: 10 }}>
-            {client && (
-              <button type="button" onClick={handleDelete} style={deleteBtnStyle}>Delete</button>
-            )}
-            <button type="button" onClick={onClose} style={cancelBtnStyle}>Cancel</button>
-            <button type="submit" disabled={saving} style={{ ...saveBtnStyle, opacity: saving ? 0.7 : 1, cursor: saving ? "not-allowed" : "pointer" }}>
+            {client && <button type="button" onClick={handleDelete} className="modal-btn-delete">Delete</button>}
+            <button type="button" onClick={onClose} className="modal-btn-cancel">Cancel</button>
+            <button type="submit" disabled={saving} className="modal-btn-save">
               {saving ? "Saving..." : client ? "Save Changes" : "Add Client"}
             </button>
           </div>
@@ -253,30 +256,13 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
   );
 }
 
-const sectionLabel: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 };
-const labelStyle: React.CSSProperties = { display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 };
-const inputStyle: React.CSSProperties = { width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" };
-const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical" as const, fontFamily: "inherit" };
-const deleteBtnStyle: React.CSSProperties = { padding: "9px 16px", borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#fca5a5", fontSize: 13, cursor: "pointer" };
-const cancelBtnStyle: React.CSSProperties = { flex: 1, padding: "9px 16px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)", fontSize: 13, cursor: "pointer" };
-const saveBtnStyle: React.CSSProperties = { flex: 2, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500 };
-
-function Field({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+function Field({ label, value, onChange, type = "text", required }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean;
+}) {
   return (
     <div>
-      <label style={labelStyle}>{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} style={inputStyle} onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")} onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")} />
-    </div>
-  );
-}
-
-function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { key: string; label: string }[] }) {
-  return (
-    <div>
-      <label style={labelStyle}>{label}</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-        {options.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-      </select>
+      <label className="modal-label">{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="modal-input" />
     </div>
   );
 }

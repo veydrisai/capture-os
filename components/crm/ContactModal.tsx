@@ -57,38 +57,24 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
   }
 
   async function handleDelete() {
-    if (!contact) return;
-    if (!confirm("Delete this contact?")) return;
+    if (!contact || !confirm("Delete this contact?")) return;
     await fetch(`/api/contacts/${contact.id}`, { method: "DELETE" });
     onSaved();
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(8px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 100,
-      }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="glass-strong"
-        style={{ width: "100%", maxWidth: 480, padding: 28 }}
-      >
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 480, padding: 28 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: "white", letterSpacing: "-0.02em" }}>
-            {contact ? "Edit Contact" : "New Contact"}
-          </h2>
-          <button
-            onClick={onClose}
-            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}
-          >
+          <div>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>
+              {contact ? "Edit Contact" : "New Contact"}
+            </h2>
+            <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", marginTop: 2, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>
+              {contact ? "Update record" : "Add to CRM"}
+            </p>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4 }}>
             <X size={18} />
           </button>
         </div>
@@ -104,23 +90,8 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
           <Field label="Title / Role" value={form.title} onChange={(v) => update("title", v)} />
 
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>
-              Type
-            </label>
-            <select
-              value={form.type}
-              onChange={(e) => update("type", e.target.value)}
-              style={{
-                width: "100%",
-                padding: "9px 12px",
-                borderRadius: 10,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.09)",
-                color: "white",
-                fontSize: 13,
-                outline: "none",
-              }}
-            >
+            <label className="modal-label">Type</label>
+            <select value={form.type} onChange={(e) => update("type", e.target.value)} className="modal-select">
               <option value="lead">Lead</option>
               <option value="prospect">Prospect</option>
               <option value="client">Client</option>
@@ -129,61 +100,13 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
           </div>
 
           {error && (
-            <p style={{ fontSize: 12, color: "#fca5a5", padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>
-              {error}
-            </p>
+            <p style={{ fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10 }}>{error}</p>
           )}
 
-          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-            {contact && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                style={{
-                  padding: "9px 16px",
-                  borderRadius: 10,
-                  background: "rgba(239,68,68,0.1)",
-                  border: "1px solid rgba(239,68,68,0.2)",
-                  color: "#fca5a5",
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                Delete
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                flex: 1,
-                padding: "9px 16px",
-                borderRadius: 10,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.09)",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: 13,
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                flex: 2,
-                padding: "9px 16px",
-                borderRadius: 10,
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                border: "none",
-                color: "white",
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: saving ? "not-allowed" : "pointer",
-                opacity: saving ? 0.7 : 1,
-              }}
-            >
+          <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+            {contact && <button type="button" onClick={handleDelete} className="modal-btn-delete">Delete</button>}
+            <button type="button" onClick={onClose} className="modal-btn-cancel">Cancel</button>
+            <button type="submit" disabled={saving} className="modal-btn-save">
               {saving ? "Saving..." : contact ? "Save Changes" : "Create Contact"}
             </button>
           </div>
@@ -193,43 +116,13 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
   );
 }
 
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  required,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-  required?: boolean;
+function Field({ label, value, onChange, type = "text", required }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean;
 }) {
   return (
     <div>
-      <label style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>
-        {label} {required && <span style={{ color: "#f87171" }}>*</span>}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        style={{
-          width: "100%",
-          padding: "9px 12px",
-          borderRadius: 10,
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.09)",
-          color: "white",
-          fontSize: 13,
-          outline: "none",
-          transition: "border-color 0.15s",
-        }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
-        onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
-      />
+      <label className="modal-label">{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="modal-input" />
     </div>
   );
 }

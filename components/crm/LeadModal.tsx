@@ -90,16 +90,18 @@ export default function LeadModal({ lead, onClose, onSaved }: Props) {
   }
 
   return (
-    <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: "20px" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="glass-strong" style={{ width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", padding: 28 }}>
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", padding: 28 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: "white", letterSpacing: "-0.02em" }}>
-            {lead ? "Edit Lead" : "New Lead"}
-          </h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}>
+          <div>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>
+              {lead ? "Edit Lead" : "New Lead"}
+            </h2>
+            <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", marginTop: 2, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>
+              {lead ? "Update record" : "Add to pipeline"}
+            </p>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4 }}>
             <X size={18} />
           </button>
         </div>
@@ -109,49 +111,45 @@ export default function LeadModal({ lead, onClose, onSaved }: Props) {
             <Field label="First Name" value={form.firstName} onChange={(v) => up("firstName", v)} required />
             <Field label="Last Name" value={form.lastName} onChange={(v) => up("lastName", v)} />
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Field label="Email" value={form.email} onChange={(v) => up("email", v)} type="email" />
             <Field label="Phone" value={form.phone} onChange={(v) => up("phone", v)} type="tel" />
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Field label="Company" value={form.company} onChange={(v) => up("company", v)} />
             <Field label="Industry" value={form.industry} onChange={(v) => up("industry", v)} />
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <SelectField label="Status" value={form.status} onChange={(v) => up("status", v)} options={STATUS_OPTIONS} />
-            <SelectField label="System Interest" value={form.systemInterest} onChange={(v) => up("systemInterest", v)} options={SYSTEM_TYPES} />
+            <div>
+              <label className="modal-label">Status</label>
+              <select value={form.status} onChange={(e) => up("status", e.target.value)} className="modal-select">
+                {STATUS_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="modal-label">System Interest</label>
+              <select value={form.systemInterest} onChange={(e) => up("systemInterest", e.target.value)} className="modal-select">
+                {SYSTEM_TYPES.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+              </select>
+            </div>
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Field label="Source" value={form.source} onChange={(v) => up("source", v)} />
             <Field label="Est. Value ($)" value={form.estimatedValue} onChange={(v) => up("estimatedValue", v)} type="number" />
           </div>
-
           <div>
-            <label style={labelStyle}>Notes</label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => up("notes", e.target.value)}
-              rows={3}
-              style={textareaStyle}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
-            />
+            <label className="modal-label">Notes</label>
+            <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={3} className="modal-textarea" />
           </div>
 
           {error && (
-            <p style={{ fontSize: 12, color: "#fca5a5", padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</p>
+            <p style={{ fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10 }}>{error}</p>
           )}
 
-          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-            {lead && (
-              <button type="button" onClick={handleDelete} style={deleteBtnStyle}>Delete</button>
-            )}
-            <button type="button" onClick={onClose} style={cancelBtnStyle}>Cancel</button>
-            <button type="submit" disabled={saving} style={{ ...saveBtnStyle, opacity: saving ? 0.7 : 1, cursor: saving ? "not-allowed" : "pointer" }}>
+          <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+            {lead && <button type="button" onClick={handleDelete} className="modal-btn-delete">Delete</button>}
+            <button type="button" onClick={onClose} className="modal-btn-cancel">Cancel</button>
+            <button type="submit" disabled={saving} className="modal-btn-save">
               {saving ? "Saving..." : lead ? "Save Changes" : "Add Lead"}
             </button>
           </div>
@@ -161,37 +159,13 @@ export default function LeadModal({ lead, onClose, onSaved }: Props) {
   );
 }
 
-const labelStyle: React.CSSProperties = { display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 };
-const inputStyle: React.CSSProperties = { width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" };
-const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical" as const, fontFamily: "inherit" };
-const deleteBtnStyle: React.CSSProperties = { padding: "9px 16px", borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#fca5a5", fontSize: 13, cursor: "pointer" };
-const cancelBtnStyle: React.CSSProperties = { flex: 1, padding: "9px 16px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)", fontSize: 13, cursor: "pointer" };
-const saveBtnStyle: React.CSSProperties = { flex: 2, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500 };
-
-function Field({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+function Field({ label, value, onChange, type = "text", required }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean;
+}) {
   return (
     <div>
-      <label style={labelStyle}>{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        style={inputStyle}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
-        onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
-      />
-    </div>
-  );
-}
-
-function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { key: string; label: string }[] }) {
-  return (
-    <div>
-      <label style={labelStyle}>{label}</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-        {options.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-      </select>
+      <label className="modal-label">{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="modal-input" />
     </div>
   );
 }

@@ -117,22 +117,22 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
       )}
 
       {modalOpen && (
-        <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
-          onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}
-        >
-          <div className="glass-strong" style={{ width: "100%", maxWidth: 460, padding: 28 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "white", marginBottom: 22, letterSpacing: "-0.02em" }}>Log Activity</h2>
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
+          <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 460, padding: 28 }}>
+            <div style={{ marginBottom: 22 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Log Activity</h2>
+              <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", marginTop: 2, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>Record an interaction</p>
+            </div>
             <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <label style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>Type</label>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <label className="modal-label">Type</label>
+                <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
                   {Object.keys(TYPE_CONFIG).map((t) => (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, type: t }))}
-                      style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid", borderColor: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.09)", background: form.type === t ? TYPE_CONFIG[t].bg : "transparent", color: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.4)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                      style={{ padding: "7px 13px", borderRadius: 9, border: "1px solid", borderColor: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.08)", background: form.type === t ? TYPE_CONFIG[t].bg : "rgba(255,255,255,0.03)", color: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.35)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, transition: "all 0.12s ease" }}
                     >
                       {TYPE_CONFIG[t].icon} {t}
                     </button>
@@ -140,32 +140,16 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
                 </div>
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>Title <span style={{ color: "#f87171" }}>*</span></label>
-                <input
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
-                />
+                <label className="modal-label">Title <span style={{ color: "#f87171" }}>*</span></label>
+                <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="modal-input" />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>Notes</label>
-                <textarea
-                  value={form.body}
-                  onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-                  rows={3}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none", resize: "vertical", fontFamily: "inherit" }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
-                />
+                <label className="modal-label">Notes</label>
+                <textarea value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} rows={3} className="modal-textarea" />
               </div>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button type="button" onClick={() => setModalOpen(false)} style={{ flex: 1, padding: "9px 16px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)", fontSize: 13, cursor: "pointer" }}>
-                  Cancel
-                </button>
-                <button type="submit" disabled={saving} style={{ flex: 2, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
+              <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                <button type="button" onClick={() => setModalOpen(false)} className="modal-btn-cancel">Cancel</button>
+                <button type="submit" disabled={saving} className="modal-btn-save">
                   {saving ? "Saving..." : "Log Activity"}
                 </button>
               </div>
