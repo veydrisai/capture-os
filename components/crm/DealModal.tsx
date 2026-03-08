@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Zap } from "lucide-react";
 
 interface Deal {
@@ -66,7 +67,7 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
     onSaved();
   }
 
-  return (
+  const modal = (
     <div style={overlay} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="animate-scale-in" style={panel}>
         {/* Fixed header */}
@@ -134,6 +135,9 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }
 
 function Field({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
