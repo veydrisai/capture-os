@@ -4,4 +4,19 @@ node_modules/
 .env
 *.tsbuildinfo
 dist/
+build/
 .DS_Store
+.react-router/
+
+# Compiled JS artifacts (TypeScript source is canonical)
+app/**/*.js
+app/**/*.js.map
+components/**/*.js
+lib/**/*.js
+drizzle/**/*.js
+*.config.js
+react-router.config.js
+vite.config.js
+app/root.js
+app/routes.js
+app/sessions.server.js

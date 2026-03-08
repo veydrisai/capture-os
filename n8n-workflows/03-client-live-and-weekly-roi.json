@@ -1,0 +1,264 @@
+{
+  "name": "03 - Client Live + Weekly ROI Reports",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "client-live",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-live",
+      "name": "Webhook - Client Live",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "operation": "equals",
+              "value2": "client.live"
+            }
+          ]
+        }
+      },
+      "id": "filter-live",
+      "name": "Filter - client.live only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "You're live. The system is dialing.",
+        "emailFormat": "html",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#86efac;text-transform:uppercase;\">RevenueCS — System Live</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">Your {{ $json.systemType }} system is live.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.businessName }} team,</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">The system is running. Calls are going out. This is where the work starts paying off.</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">Track every call, booking, and dollar attributed to the system in real-time on your ROI dashboard:</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:28px;\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.roiDashboardUrl }}\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;\">Open Your ROI Dashboard →</a>\n  </td></tr></table>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 8px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">What to watch</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\">• Call connect rate — target above 30%</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\">• Demo book rate — target 8–15%</p>\n      <p style=\"margin:0;font-size:14px;color:#111827;\">• No-show rate — keep below 25%</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;line-height:1.6;\">We monitor daily. You'll get a weekly report every Monday. If anything needs adjusting, we're on it before you even notice.</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael — RevenueCS &nbsp;·&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "options": {}
+      },
+      "id": "email-golive-client",
+      "name": "Email - Go-Live to Client",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 100],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "michael@revenuecs.com",
+        "subject": "🚀 Client Live — {{ $json.businessName }} | {{ $json.systemType }}",
+        "emailFormat": "html",
+        "message": "<p><strong>{{ $json.businessName }}</strong> is now LIVE on the <strong>{{ $json.systemType }}</strong> system.</p><p><strong>MRR:</strong> ${{ $json.monthlyRetainer }}/mo<br/><strong>ROI Dashboard:</strong> {{ $json.roiDashboardUrl }}</p><p>Begin weekly ROI reports starting this Monday.</p>",
+        "options": {}
+      },
+      "id": "email-golive-internal",
+      "name": "Email - Go-Live Internal",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 280],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "action": "create_activity",
+          "type": "note",
+          "title": "Client went live — go-live email sent",
+          "body": "Auto-triggered by n8n. Go-live email sent to client.",
+          "clientId": "={{ $json.clientId }}"
+        },
+        "options": {}
+      },
+      "id": "log-golive-activity",
+      "name": "CRM - Log Go-Live Activity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 180]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": true }"
+      },
+      "id": "respond-live",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 420]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0,
+              "triggerAtDay": [1]
+            }
+          ]
+        }
+      },
+      "id": "cron-weekly",
+      "name": "Cron - Every Monday 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 600]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://YOUR_APP.vercel.app/api/clients?status=live",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-live-clients",
+      "name": "CRM - Fetch Live Clients",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 600]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "={{ $json }}",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "split-clients",
+      "name": "Split - Each Client",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [680, 600]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.roiDashboardUrl }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "check-roi-url",
+      "name": "IF - Has ROI Dashboard URL",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 600]
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "This week's numbers are in — {{ $json.businessName }}",
+        "emailFormat": "html",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#a5b4fc;text-transform:uppercase;\">RevenueCS — Weekly Report</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">Your numbers for the week.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.businessName }} team — your weekly performance data is ready. See exactly how many calls went out, how many bookings came in, and what the system generated this week.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:28px;\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.roiDashboardUrl }}\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;\">View This Week's Report →</a>\n  </td></tr></table>\n  <p style=\"margin:0 0 8px;font-size:13px;color:#6b7280;line-height:1.6;\">Numbers off? Reply to this email and we'll take a look. We review every week and optimize based on what the data shows.</p>\n  <p style=\"margin:0;font-size:13px;color:#6b7280;\">— The RevenueCS team</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael — RevenueCS &nbsp;·&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "options": {}
+      },
+      "id": "email-roi-report",
+      "name": "Email - Weekly ROI Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1120, 540],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "action": "create_activity",
+          "type": "email",
+          "title": "Weekly ROI report sent",
+          "body": "Auto-sent every Monday via n8n cron.",
+          "clientId": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "log-roi-activity",
+      "name": "CRM - Log ROI Report Activity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 540]
+    }
+  ],
+  "connections": {
+    "Webhook - Client Live": {
+      "main": [[{ "node": "Filter - client.live only", "type": "main", "index": 0 }]]
+    },
+    "Filter - client.live only": {
+      "main": [
+        [
+          { "node": "Email - Go-Live to Client", "type": "main", "index": 0 },
+          { "node": "Email - Go-Live Internal", "type": "main", "index": 0 },
+          { "node": "Respond OK", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Email - Go-Live to Client": {
+      "main": [[{ "node": "CRM - Log Go-Live Activity", "type": "main", "index": 0 }]]
+    },
+    "Cron - Every Monday 9AM": {
+      "main": [[{ "node": "CRM - Fetch Live Clients", "type": "main", "index": 0 }]]
+    },
+    "CRM - Fetch Live Clients": {
+      "main": [[{ "node": "Split - Each Client", "type": "main", "index": 0 }]]
+    },
+    "Split - Each Client": {
+      "main": [[{ "node": "IF - Has ROI Dashboard URL", "type": "main", "index": 0 }]]
+    },
+    "IF - Has ROI Dashboard URL": {
+      "main": [[{ "node": "Email - Weekly ROI Report", "type": "main", "index": 0 }]]
+    },
+    "Email - Weekly ROI Report": {
+      "main": [[{ "node": "CRM - Log ROI Report Activity", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

@@ -1,0 +1,165 @@
+{
+  "name": "02 - Agreement Signed → Onboarding Kickoff",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deal-agreement-signed",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-signed",
+      "name": "Webhook - Agreement Signed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "operation": "equals",
+              "value2": "deal.agreement_signed"
+            }
+          ]
+        }
+      },
+      "id": "filter-signed",
+      "name": "Filter - agreement_signed only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "={{ $json.contactEmail }}",
+        "subject": "You're in. Here's what happens next.",
+        "emailFormat": "html",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#a5b4fc;text-transform:uppercase;\">RevenueCS</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">Agreement signed. We're building.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.contactName }},</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">That's it — you're officially a RevenueCS client. Your <strong>{{ $json.systemType }}</strong> system is now in the build queue and we move fast.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">What happens next</p>\n      <p style=\"margin:0 0 8px;font-size:14px;color:#111827;\">① Complete your intake form <span style=\"color:#6b7280;\">(10 min — do this today)</span></p>\n      <p style=\"margin:0 0 8px;font-size:14px;color:#111827;\">② We review for compliance &amp; schedule your kickoff call</p>\n      <p style=\"margin:0 0 8px;font-size:14px;color:#111827;\">③ We build and test your system</p>\n      <p style=\"margin:0;font-size:14px;color:#111827;\">④ Soft launch → full launch → you start getting bookings</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">The intake form is the only thing blocking us from starting. Takes 10 minutes. The faster you submit it, the faster you're live.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.intakeFormUrl }}\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;\">Complete Your Intake Form →</a>\n  </td></tr></table>\n  <p style=\"margin:28px 0 0;font-size:13px;color:#9ca3af;line-height:1.6;\">Questions? Just reply here. We're building something that's going to change your revenue — let's move.</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael — RevenueCS &nbsp;·&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "options": {}
+      },
+      "id": "email-welcome",
+      "name": "Email - Welcome + Intake Form",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 180],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "michael@revenuecs.com",
+        "subject": "✅ New Client Signed — {{ $json.contactName }} | {{ $json.systemType }}",
+        "emailFormat": "html",
+        "message": "<p><strong>Deal:</strong> {{ $json.dealTitle }}<br/><strong>Client:</strong> {{ $json.contactName }} ({{ $json.contactEmail }})<br/><strong>System:</strong> {{ $json.systemType }}<br/><strong>Setup:</strong> ${{ $json.setupFee }} | <strong>MRR:</strong> ${{ $json.monthlyRetainer }}/mo</p><p>Intake form has been sent. Next steps: wait for intake submission, then start compliance review.</p>",
+        "options": {}
+      },
+      "id": "email-internal-signed",
+      "name": "Email - Internal New Client Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 360],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "action": "update_client_onboarding",
+          "clientId": "={{ $json.clientId }}",
+          "intakeFormSent": true,
+          "onboardingStatus": "intake_sent"
+        },
+        "options": {}
+      },
+      "id": "update-crm-intake",
+      "name": "CRM - Mark Intake Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "action": "create_activity",
+          "type": "email",
+          "title": "Onboarding kicked off — intake form sent",
+          "body": "Welcome email + intake form auto-sent via n8n on agreement_signed.",
+          "dealId": "={{ $json.dealId }}"
+        },
+        "options": {}
+      },
+      "id": "log-activity-signed",
+      "name": "CRM - Log Activity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 360]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": true }"
+      },
+      "id": "respond-signed",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 500]
+    }
+  ],
+  "connections": {
+    "Webhook - Agreement Signed": {
+      "main": [[{ "node": "Filter - agreement_signed only", "type": "main", "index": 0 }]]
+    },
+    "Filter - agreement_signed only": {
+      "main": [
+        [
+          { "node": "Email - Welcome + Intake Form", "type": "main", "index": 0 },
+          { "node": "Email - Internal New Client Alert", "type": "main", "index": 0 },
+          { "node": "Respond OK", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Email - Welcome + Intake Form": {
+      "main": [[{ "node": "CRM - Mark Intake Sent", "type": "main", "index": 0 }]]
+    },
+    "Email - Internal New Client Alert": {
+      "main": [[{ "node": "CRM - Log Activity", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

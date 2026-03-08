@@ -1,0 +1,135 @@
+{
+  "name": "01 - Proposal Sent → Agreement Sender",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deal-proposal-sent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-demo-done",
+      "name": "Webhook - Proposal Sent",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "operation": "equals",
+              "value2": "deal.proposal_sent"
+            }
+          ]
+        }
+      },
+      "id": "filter-event",
+      "name": "Filter - proposal_sent only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "={{ $json.contactEmail }}",
+        "subject": "Your RevenueCS agreement is ready to sign",
+        "emailFormat": "html",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#a5b4fc;text-transform:uppercase;\">RevenueCS</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">Your agreement is ready.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.contactName }},</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">As discussed, I've put together your agreement for the <strong>{{ $json.systemType }}</strong> system. Everything we covered is outlined inside.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 8px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">Agreement summary</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>System:</strong> {{ $json.systemType }}</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>Setup fee:</strong> ${{ $json.setupFee }}</p>\n      <p style=\"margin:0;font-size:14px;color:#111827;\"><strong>Monthly retainer:</strong> ${{ $json.monthlyRetainer }}/mo</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">Once signed we'll get onboarding started right away. Any questions before then, just reply here.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.agreementTemplateUrl }}\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;\">Review &amp; Sign Agreement →</a>\n  </td></tr></table>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael — RevenueCS &nbsp;·&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "options": {}
+      },
+      "id": "email-to-prospect",
+      "name": "Email - Agreement to Prospect",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 200],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "michael@revenuecs.com",
+        "subject": "🎯 Demo Done — Agreement Sent to {{ $json.contactName }}",
+        "emailFormat": "html",
+        "message": "<p><strong>Deal:</strong> {{ $json.dealTitle }}<br/><strong>Contact:</strong> {{ $json.contactName }} ({{ $json.contactEmail }})<br/><strong>System:</strong> {{ $json.systemType }}<br/><strong>Setup:</strong> ${{ $json.setupFee }} | <strong>MRR:</strong> ${{ $json.monthlyRetainer }}/mo</p><p>Agreement has been emailed to the prospect. Follow up in 24 hours if no signature.</p>",
+        "options": {}
+      },
+      "id": "email-internal-demo",
+      "name": "Email - Internal Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 380],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "action": "create_activity",
+          "type": "email",
+          "title": "Agreement emailed to prospect",
+          "body": "Auto-sent via n8n after demo_done stage. Agreement URL included.",
+          "dealId": "={{ $json.dealId }}"
+        },
+        "options": {}
+      },
+      "id": "log-activity-demo",
+      "name": "CRM - Log Activity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": true }"
+      },
+      "id": "respond-demo",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 500]
+    }
+  ],
+  "connections": {
+    "Webhook - Demo Done": {
+      "main": [[{ "node": "Filter - demo_done only", "type": "main", "index": 0 }]]
+    },
+    "Filter - demo_done only": {
+      "main": [
+        [
+          { "node": "Email - Agreement to Prospect", "type": "main", "index": 0 },
+          { "node": "Email - Internal Alert", "type": "main", "index": 0 },
+          { "node": "Respond OK", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Email - Agreement to Prospect": {
+      "main": [[{ "node": "CRM - Log Activity", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

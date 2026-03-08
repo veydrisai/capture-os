@@ -173,6 +173,7 @@ export const clients = pgTable("clients", {
   dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
   businessName: text("business_name").notNull(),
+  email: text("email"),
   systemType: systemTypeEnum("system_type"),
   onboardingStatus: onboardingStatusEnum("onboarding_status").default("pending").notNull(),
   intakeFormSent: boolean("intake_form_sent").default(false),
@@ -267,8 +268,10 @@ export const activities = pgTable("activities", {
 export const workspaceSettings = pgTable("workspace_settings", {
   id: uuid("id").primaryKey().defaultRandom(),
   makeWebhookUrl: text("make_webhook_url"),
+  n8nWebhookUrl: text("n8n_webhook_url"),
   agreementTemplateUrl: text("agreement_template_url"),
   intakeFormUrl: text("intake_form_url"),
+  internalEmail: text("internal_email"),
   updatedBy: uuid("updated_by").references(() => users.id),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
