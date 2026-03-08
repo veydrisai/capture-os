@@ -117,22 +117,22 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
       )}
 
       {modalOpen && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
-          <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 460, padding: 28 }}>
-            <div style={{ marginBottom: 22 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Log Activity</h2>
-              <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", marginTop: 2, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>Record an interaction</p>
+        <div style={overlay} onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
+          <div style={panel}>
+            <div style={modalHeader}>
+              <h2 style={modalTitle}>Log Activity</h2>
+              <p style={modalSubtitle}>Record an interaction</p>
             </div>
-            <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 14, padding: 24 }}>
               <div>
-                <label className="modal-label">Type</label>
+                <label style={labelStyle}>Type</label>
                 <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
                   {Object.keys(TYPE_CONFIG).map((t) => (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, type: t }))}
-                      style={{ padding: "7px 13px", borderRadius: 9, border: "1px solid", borderColor: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.08)", background: form.type === t ? TYPE_CONFIG[t].bg : "rgba(255,255,255,0.03)", color: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.35)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, transition: "all 0.12s ease" }}
+                      style={{ padding: "7px 13px", borderRadius: 9, border: "1px solid", borderColor: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.08)", background: form.type === t ? TYPE_CONFIG[t].bg : "rgba(255,255,255,0.03)", color: form.type === t ? TYPE_CONFIG[t].color : "rgba(255,255,255,0.35)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, transition: "all 0.12s ease", fontFamily: "inherit" }}
                     >
                       {TYPE_CONFIG[t].icon} {t}
                     </button>
@@ -140,16 +140,22 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
                 </div>
               </div>
               <div>
-                <label className="modal-label">Title <span style={{ color: "#f87171" }}>*</span></label>
-                <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="modal-input" />
+                <label style={labelStyle}>Title <span style={{ color: "#f87171" }}>*</span></label>
+                <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} style={inputStyle}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+                />
               </div>
               <div>
-                <label className="modal-label">Notes</label>
-                <textarea value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} rows={3} className="modal-textarea" />
+                <label style={labelStyle}>Notes</label>
+                <textarea value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} rows={3} style={textareaStyle}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+                />
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                <button type="button" onClick={() => setModalOpen(false)} className="modal-btn-cancel">Cancel</button>
-                <button type="submit" disabled={saving} className="modal-btn-save">
+                <button type="button" onClick={() => setModalOpen(false)} style={cancelBtn}>Cancel</button>
+                <button type="submit" disabled={saving} style={{ ...saveBtn, opacity: saving ? 0.7 : 1 }}>
                   {saving ? "Saving..." : "Log Activity"}
                 </button>
               </div>
@@ -160,3 +166,14 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
     </div>
   );
 }
+
+const overlay: React.CSSProperties = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: "24px 24px 24px 248px" };
+const panel: React.CSSProperties = { width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto", background: "#0f0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3)" };
+const modalHeader: React.CSSProperties = { padding: "24px 24px 0" };
+const modalTitle: React.CSSProperties = { fontSize: 20, fontWeight: 700, color: "white", letterSpacing: "-0.03em", marginBottom: 3 };
+const modalSubtitle: React.CSSProperties = { fontSize: 12, color: "rgba(99,102,241,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 };
+const inputStyle: React.CSSProperties = { width: "100%", padding: "11px 14px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "white", fontSize: 14, fontFamily: "inherit", outline: "none", transition: "border-color 0.15s ease, box-shadow 0.15s ease" };
+const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical", lineHeight: 1.6 };
+const cancelBtn: React.CSSProperties = { flex: 1, padding: "10px 16px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
+const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.35)" };

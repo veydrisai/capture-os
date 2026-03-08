@@ -4,98 +4,55 @@ import { useState } from "react";
 import { X, Zap } from "lucide-react";
 
 interface Deal {
-  id: string;
-  title: string;
-  stage: string;
-  systemType: string | null;
-  value: number;
-  setupFee: number;
-  monthlyRetainer: number;
-  probability: number;
-  closeDate: string | null;
-  agreementSentAt: string | null;
-  agreementSignedAt: string | null;
-  paymentReceivedAt: string | null;
-  demoBookedAt: string | null;
-  demoDoneAt: string | null;
-  lostReason: string | null;
-  notes: string | null;
-  webhookFired: boolean;
+  id: string; title: string; stage: string; systemType: string | null;
+  value: number; setupFee: number; monthlyRetainer: number; probability: number;
+  closeDate: string | null; agreementSentAt: string | null; agreementSignedAt: string | null;
+  paymentReceivedAt: string | null; demoBookedAt: string | null; demoDoneAt: string | null;
+  lostReason: string | null; notes: string | null; webhookFired: boolean;
 }
 
-interface Props {
-  deal: Deal | null;
-  onClose: () => void;
-  onSaved: () => void;
-}
+interface Props { deal: Deal | null; onClose: () => void; onSaved: () => void; }
 
 const STAGE_OPTIONS = [
-  { key: "cold_outreach",    label: "Cold Outreach" },
-  { key: "demo_booked",      label: "Demo Booked" },
-  { key: "demo_done",        label: "Demo Done" },
-  { key: "proposal_sent",    label: "Proposal Sent" },
-  { key: "agreement_signed", label: "Agreement Signed" },
-  { key: "onboarding",       label: "Onboarding" },
-  { key: "live",             label: "Live" },
-  { key: "upsell",           label: "Upsell" },
-  { key: "lost",             label: "Lost" },
+  { key: "cold_outreach", label: "Cold Outreach" }, { key: "demo_booked", label: "Demo Booked" },
+  { key: "demo_done", label: "Demo Done" }, { key: "proposal_sent", label: "Proposal Sent" },
+  { key: "agreement_signed", label: "Agreement Signed" }, { key: "onboarding", label: "Onboarding" },
+  { key: "live", label: "Live" }, { key: "upsell", label: "Upsell" }, { key: "lost", label: "Lost" },
 ];
 
 const SYSTEM_TYPES = [
-  { key: "", label: "None" },
-  { key: "reactivation", label: "Reactivation" },
-  { key: "hot_lead",     label: "Hot Lead" },
-  { key: "backend",      label: "Backend" },
-  { key: "combo",        label: "Combo" },
+  { key: "", label: "None" }, { key: "reactivation", label: "Reactivation" },
+  { key: "hot_lead", label: "Hot Lead" }, { key: "backend", label: "Backend" }, { key: "combo", label: "Combo" },
 ];
 
-function toDateInput(val: string | null | undefined) {
-  if (!val) return "";
-  return String(val).split("T")[0];
-}
+function toDate(val: string | null | undefined) { return val ? String(val).split("T")[0] : ""; }
 
 export default function DealModal({ deal, onClose, onSaved }: Props) {
   const [form, setForm] = useState({
-    title: deal?.title ?? "",
-    stage: deal?.stage ?? "cold_outreach",
-    systemType: deal?.systemType ?? "",
-    value: deal?.value?.toString() ?? "",
-    setupFee: deal?.setupFee?.toString() ?? "",
-    monthlyRetainer: deal?.monthlyRetainer?.toString() ?? "",
-    probability: deal?.probability?.toString() ?? "",
-    closeDate: toDateInput(deal?.closeDate),
-    agreementSentAt: toDateInput(deal?.agreementSentAt),
-    agreementSignedAt: toDateInput(deal?.agreementSignedAt),
-    paymentReceivedAt: toDateInput(deal?.paymentReceivedAt),
-    demoBookedAt: toDateInput(deal?.demoBookedAt),
-    demoDoneAt: toDateInput(deal?.demoDoneAt),
-    lostReason: deal?.lostReason ?? "",
-    notes: deal?.notes ?? "",
+    title: deal?.title ?? "", stage: deal?.stage ?? "cold_outreach",
+    systemType: deal?.systemType ?? "", value: deal?.value?.toString() ?? "",
+    setupFee: deal?.setupFee?.toString() ?? "", monthlyRetainer: deal?.monthlyRetainer?.toString() ?? "",
+    probability: deal?.probability?.toString() ?? "", closeDate: toDate(deal?.closeDate),
+    agreementSentAt: toDate(deal?.agreementSentAt), agreementSignedAt: toDate(deal?.agreementSignedAt),
+    paymentReceivedAt: toDate(deal?.paymentReceivedAt), demoBookedAt: toDate(deal?.demoBookedAt),
+    demoDoneAt: toDate(deal?.demoDoneAt), lostReason: deal?.lostReason ?? "", notes: deal?.notes ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
   const up = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
+    e.preventDefault(); setSaving(true); setError("");
     try {
-      const method = deal ? "PATCH" : "POST";
-      const url = deal ? `/api/deals/${deal.id}` : "/api/deals";
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(deal ? `/api/deals/${deal.id}` : "/api/deals", {
+        method: deal ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error(await res.text());
       onSaved();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSaving(false);
-    }
+    } catch (err) { setError(err instanceof Error ? err.message : "Something went wrong"); }
+    finally { setSaving(false); }
   }
 
   async function handleDelete() {
@@ -105,61 +62,38 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 580, maxHeight: "90vh", overflowY: "auto", padding: 28 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+    <div style={overlay} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ ...panel, maxWidth: 580, maxHeight: "90vh", overflowY: "auto" }}>
+        <div style={header}>
           <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>
-              {deal ? "Edit Deal" : "New Deal"}
-            </h2>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
-              <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>
-                {deal ? "Update pipeline record" : "Add to pipeline"}
-              </p>
-              {deal?.webhookFired && (
-                <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 10, color: "#4ade80", fontWeight: 600 }}>
-                  <Zap size={9} /> Make fired
-                </span>
-              )}
+            <h2 style={title}>{deal ? "Edit Deal" : "New Deal"}</h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 3 }}>
+              <p style={subtitle}>{deal ? "Update pipeline record" : "Add to pipeline"}</p>
+              {deal?.webhookFired && <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, color: "#4ade80", fontWeight: 600 }}><Zap size={10} /> Make fired</span>}
             </div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4 }}>
-            <X size={18} />
-          </button>
+          <button onClick={onClose} style={closeBtn}><X size={18} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <form onSubmit={handleSubmit} style={form_}>
           <Field label="Deal / Company Name" value={form.title} onChange={(v) => up("title", v)} required />
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <label className="modal-label">Stage</label>
-              <select value={form.stage} onChange={(e) => up("stage", e.target.value)} className="modal-select">
-                {STAGE_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="modal-label">System Type</label>
-              <select value={form.systemType} onChange={(e) => up("systemType", e.target.value)} className="modal-select">
-                {SYSTEM_TYPES.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-              </select>
-            </div>
+          <div style={grid2}>
+            <SelectF label="Stage" value={form.stage} onChange={(v) => up("stage", v)} options={STAGE_OPTIONS} />
+            <SelectF label="System Type" value={form.systemType} onChange={(v) => up("systemType", v)} options={SYSTEM_TYPES} />
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          <div style={grid3}>
             <Field label="Setup Fee ($)" value={form.setupFee} onChange={(v) => up("setupFee", v)} type="number" />
             <Field label="Monthly Retainer ($)" value={form.monthlyRetainer} onChange={(v) => up("monthlyRetainer", v)} type="number" />
             <Field label="Total Value ($)" value={form.value} onChange={(v) => up("value", v)} type="number" />
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={grid2}>
             <Field label="Probability (%)" value={form.probability} onChange={(v) => up("probability", v)} type="number" />
             <Field label="Close Date" value={form.closeDate} onChange={(v) => up("closeDate", v)} type="date" />
           </div>
 
           <div>
-            <p className="modal-section">Timeline Tracking</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <p style={sectionLabel}>Timeline Tracking</p>
+            <div style={grid2}>
               <Field label="Demo Booked" value={form.demoBookedAt} onChange={(v) => up("demoBookedAt", v)} type="date" />
               <Field label="Demo Done" value={form.demoDoneAt} onChange={(v) => up("demoDoneAt", v)} type="date" />
               <Field label="Agreement Sent" value={form.agreementSentAt} onChange={(v) => up("agreementSentAt", v)} type="date" />
@@ -168,23 +102,21 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
             </div>
           </div>
 
-          {form.stage === "lost" && (
-            <Field label="Lost Reason" value={form.lostReason} onChange={(v) => up("lostReason", v)} />
-          )}
+          {form.stage === "lost" && <Field label="Lost Reason" value={form.lostReason} onChange={(v) => up("lostReason", v)} />}
 
           <div>
-            <label className="modal-label">Notes</label>
-            <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={3} className="modal-textarea" />
+            <label style={labelStyle}>Notes</label>
+            <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={3} style={textareaStyle}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+            />
           </div>
 
-          {error && (
-            <p style={{ fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10 }}>{error}</p>
-          )}
-
-          <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-            {deal && <button type="button" onClick={handleDelete} className="modal-btn-delete">Delete</button>}
-            <button type="button" onClick={onClose} className="modal-btn-cancel">Cancel</button>
-            <button type="submit" disabled={saving} className="modal-btn-save">
+          {error && <p style={errorStyle}>{error}</p>}
+          <div style={btns}>
+            {deal && <button type="button" onClick={handleDelete} style={deleteBtn}>Delete</button>}
+            <button type="button" onClick={onClose} style={cancelBtn}>Cancel</button>
+            <button type="submit" disabled={saving} style={{ ...saveBtn, opacity: saving ? 0.7 : 1 }}>
               {saving ? "Saving..." : deal ? "Save Changes" : "Create Deal"}
             </button>
           </div>
@@ -194,13 +126,48 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
   );
 }
 
-function Field({ label, value, onChange, type = "text", required }: {
-  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean;
-}) {
+function Field({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
   return (
     <div>
-      <label className="modal-label">{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="modal-input" />
+      <label style={labelStyle}>{label}{required && <span style={{ color: "#f87171", marginLeft: 3 }}>*</span>}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} style={inputStyle}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+      />
     </div>
   );
 }
+
+function SelectF({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { key: string; label: string }[] }) {
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={selectStyle}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+      >
+        {options.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+      </select>
+    </div>
+  );
+}
+
+const overlay: React.CSSProperties = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 24 };
+const panel: React.CSSProperties = { width: "100%", background: "#0f0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3)" };
+const header: React.CSSProperties = { display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "24px 24px 0" };
+const title: React.CSSProperties = { fontSize: 20, fontWeight: 700, color: "white", letterSpacing: "-0.03em", marginBottom: 3 };
+const subtitle: React.CSSProperties = { fontSize: 12, color: "rgba(99,102,241,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
+const closeBtn: React.CSSProperties = { background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, marginTop: -2 };
+const form_: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 16, padding: 24 };
+const grid2: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 };
+const grid3: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 };
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 };
+const sectionLabel: React.CSSProperties = { fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.22)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" };
+const inputStyle: React.CSSProperties = { width: "100%", padding: "11px 14px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "white", fontSize: 14, fontFamily: "inherit", outline: "none", transition: "border-color 0.15s ease, box-shadow 0.15s ease" };
+const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer", appearance: "none", WebkitAppearance: "none" };
+const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical", lineHeight: 1.6 };
+const btns: React.CSSProperties = { display: "flex", gap: 10, marginTop: 4 };
+const deleteBtn: React.CSSProperties = { padding: "10px 16px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", color: "#fca5a5", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
+const cancelBtn: React.CSSProperties = { flex: 1, padding: "10px 16px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
+const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.35)" };
+const errorStyle: React.CSSProperties = { fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 10 };

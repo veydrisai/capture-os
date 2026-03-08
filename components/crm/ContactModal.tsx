@@ -63,24 +63,18 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="glass-strong animate-scale-in" style={{ width: "100%", maxWidth: 480, padding: 28 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+    <div style={overlay} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={panel}>
+        <div style={header}>
           <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>
-              {contact ? "Edit Contact" : "New Contact"}
-            </h2>
-            <p style={{ fontSize: 11, color: "rgba(99,102,241,0.7)", marginTop: 2, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 600 }}>
-              {contact ? "Update record" : "Add to CRM"}
-            </p>
+            <h2 style={title}>{contact ? "Edit Contact" : "New Contact"}</h2>
+            <p style={subtitle}>{contact ? "Update record" : "Add to CRM"}</p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4 }}>
-            <X size={18} />
-          </button>
+          <button onClick={onClose} style={closeBtn}><X size={18} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <form onSubmit={handleSubmit} style={form_}>
+          <div style={grid2}>
             <Field label="First Name" value={form.firstName} onChange={(v) => update("firstName", v)} required />
             <Field label="Last Name" value={form.lastName} onChange={(v) => update("lastName", v)} required />
           </div>
@@ -90,8 +84,11 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
           <Field label="Title / Role" value={form.title} onChange={(v) => update("title", v)} />
 
           <div>
-            <label className="modal-label">Type</label>
-            <select value={form.type} onChange={(e) => update("type", e.target.value)} className="modal-select">
+            <label style={labelStyle}>Type</label>
+            <select value={form.type} onChange={(e) => update("type", e.target.value)} style={selectStyle}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+            >
               <option value="lead">Lead</option>
               <option value="prospect">Prospect</option>
               <option value="client">Client</option>
@@ -99,14 +96,12 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
             </select>
           </div>
 
-          {error && (
-            <p style={{ fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10 }}>{error}</p>
-          )}
+          {error && <p style={errorStyle}>{error}</p>}
 
-          <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-            {contact && <button type="button" onClick={handleDelete} className="modal-btn-delete">Delete</button>}
-            <button type="button" onClick={onClose} className="modal-btn-cancel">Cancel</button>
-            <button type="submit" disabled={saving} className="modal-btn-save">
+          <div style={btns}>
+            {contact && <button type="button" onClick={handleDelete} style={deleteBtn}>Delete</button>}
+            <button type="button" onClick={onClose} style={cancelBtn}>Cancel</button>
+            <button type="submit" disabled={saving} style={{ ...saveBtn, opacity: saving ? 0.7 : 1 }}>
               {saving ? "Saving..." : contact ? "Save Changes" : "Create Contact"}
             </button>
           </div>
@@ -121,8 +116,30 @@ function Field({ label, value, onChange, type = "text", required }: {
 }) {
   return (
     <div>
-      <label className="modal-label">{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="modal-input" />
+      <label style={labelStyle}>{label}{required && <span style={{ color: "#f87171", marginLeft: 3 }}>*</span>}</label>
+      <input
+        type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required}
+        style={inputStyle}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+      />
     </div>
   );
 }
+
+const overlay: React.CSSProperties = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 24 };
+const panel: React.CSSProperties = { width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto", background: "#0f0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3)" };
+const header: React.CSSProperties = { display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "24px 24px 0" };
+const title: React.CSSProperties = { fontSize: 20, fontWeight: 700, color: "white", letterSpacing: "-0.03em", marginBottom: 3 };
+const subtitle: React.CSSProperties = { fontSize: 12, color: "rgba(99,102,241,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
+const closeBtn: React.CSSProperties = { background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, marginTop: -2 };
+const form_: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 16, padding: 24 };
+const grid2: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 };
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 };
+const inputStyle: React.CSSProperties = { width: "100%", padding: "11px 14px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "white", fontSize: 14, fontFamily: "inherit", outline: "none", transition: "border-color 0.15s ease, box-shadow 0.15s ease" };
+const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer", appearance: "none", WebkitAppearance: "none" };
+const btns: React.CSSProperties = { display: "flex", gap: 10, marginTop: 4 };
+const deleteBtn: React.CSSProperties = { padding: "10px 16px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", color: "#fca5a5", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
+const cancelBtn: React.CSSProperties = { flex: 1, padding: "10px 16px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
+const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.35)" };
+const errorStyle: React.CSSProperties = { fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 10 };

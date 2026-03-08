@@ -79,12 +79,12 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pipeline..." style={{ width: "100%", maxWidth: 360, padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
       </div>
 
-      <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 16, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 20, paddingRight: 4, alignItems: "flex-start", width: "100%" }}>
         {STAGES.map((stage) => {
           const stageDeals = filtered.filter((d) => d.stage === stage.key);
           const total = stageDeals.reduce((s, d) => s + (d.value ?? 0), 0);
           return (
-            <div key={stage.key} style={{ minWidth: 220, maxWidth: 220, display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+            <div key={stage.key} style={{ minWidth: 240, width: 240, display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 10px", borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                   <div style={{ width: 7, height: 7, borderRadius: "50%", background: stage.color, boxShadow: `0 0 6px ${stage.color}60` }} />

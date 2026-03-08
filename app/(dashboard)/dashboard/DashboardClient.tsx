@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "react-router";
 import { Calendar, FileCheck, Users2, TrendingUp, ArrowUpRight, DollarSign } from "lucide-react";
 
 interface RecentDeal {

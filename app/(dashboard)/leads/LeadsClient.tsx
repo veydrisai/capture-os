@@ -92,11 +92,11 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
       </div>
 
       {view === "kanban" && (
-        <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 16, alignItems: "flex-start" }}>
+        <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 20, paddingRight: 4, alignItems: "flex-start", width: "100%" }}>
           {STAGES.map((stage) => {
             const stageLeads = filtered.filter((l) => l.status === stage.key);
             return (
-              <div key={stage.key} style={{ minWidth: 210, maxWidth: 210, display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+              <div key={stage.key} style={{ minWidth: 220, width: 220, display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 10px", borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
                   <div style={{ width: 7, height: 7, borderRadius: "50%", background: stage.color, boxShadow: `0 0 6px ${stage.color}60` }} />
                   <span style={{ fontSize: 11.5, fontWeight: 500, color: "white" }}>{stage.label}</span>
