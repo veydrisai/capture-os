@@ -99,7 +99,9 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
   const [importedCount, setImportedCount] = useState(0);
+  const [batchProgress, setBatchProgress] = useState({ done: 0, total: 0 });
   const fileRef = useRef<HTMLInputElement>(null);
+  const BATCH_SIZE = 500;
 
   function handleFile(file: File) {
     setError("");
@@ -124,15 +126,27 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
   async function handleImport() {
     setStep("importing");
     setError("");
+
+    const batches: ParsedLead[][] = [];
+    for (let i = 0; i < parsedLeads.length; i += BATCH_SIZE) {
+      batches.push(parsedLeads.slice(i, i + BATCH_SIZE));
+    }
+    setBatchProgress({ done: 0, total: batches.length });
+
+    let totalInserted = 0;
     try {
-      const res = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsedLeads),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setImportedCount(Array.isArray(data) ? data.length : parsedLeads.length);
+      for (let i = 0; i < batches.length; i++) {
+        const res = await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(batches[i]),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        totalInserted += Array.isArray(data) ? data.length : batches[i].length;
+        setBatchProgress({ done: i + 1, total: batches.length });
+      }
+      setImportedCount(totalInserted);
       setStep("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Import failed");
@@ -150,7 +164,7 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
             <p style={subtitleStyle}>
               {step === "upload" && "Upload a CSV file"}
               {step === "preview" && `${parsedLeads.length} leads ready to import`}
-              {step === "importing" && "Importing..."}
+              {step === "importing" && `Batch ${batchProgress.done}/${batchProgress.total} — ${batchProgress.total > 0 ? Math.round((batchProgress.done / batchProgress.total) * 100) : 0}%`}
               {step === "done" && `${importedCount} leads imported`}
             </p>
           </div>
@@ -232,9 +246,27 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
 
           {/* STEP: Importing */}
           {step === "importing" && (
-            <div style={{ textAlign: "center", padding: "48px 0" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3px solid rgba(99,102,241,0.2)", borderTopColor: "#6366f1", animation: "spin 0.7s linear infinite", margin: "0 auto 16px" }} />
-              <p style={{ color: "white", fontWeight: 500 }}>Importing {parsedLeads.length} leads...</p>
+            <div style={{ padding: "48px 24px", textAlign: "center" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3px solid rgba(99,102,241,0.2)", borderTopColor: "#6366f1", animation: "spin 0.7s linear infinite", margin: "0 auto 20px" }} />
+              <p style={{ color: "white", fontWeight: 600, fontSize: 15, marginBottom: 6 }}>
+                Importing {parsedLeads.length.toLocaleString()} leads...
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 24 }}>
+                Batch {batchProgress.done} of {batchProgress.total}
+              </p>
+              {/* Progress bar */}
+              <div style={{ width: "100%", height: 6, borderRadius: 999, background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
+                <div style={{
+                  height: "100%",
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
+                  width: `${batchProgress.total > 0 ? Math.round((batchProgress.done / batchProgress.total) * 100) : 0}%`,
+                  transition: "width 0.3s ease",
+                }} />
+              </div>
+              <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 12, marginTop: 10 }}>
+                {batchProgress.total > 0 ? Math.round((batchProgress.done / batchProgress.total) * 100) : 0}% complete
+              </p>
             </div>
           )}
 
