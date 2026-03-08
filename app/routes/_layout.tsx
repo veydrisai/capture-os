@@ -20,7 +20,7 @@ export default function DashboardLayout({ loaderData }: { loaderData: Awaited<Re
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar user={data.user} />
-      <main style={{ marginLeft: 224, minHeight: "100vh", padding: "36px 40px", width: "calc(100vw - 224px)", overflowX: "hidden" }}>
+      <main style={{ marginLeft: 224, minHeight: "100vh", padding: "28px 24px", width: "calc(100vw - 224px)", overflowX: "hidden" }}>
         <Outlet />
       </main>
     </div>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Columns, List, TrendingUp } from "lucide-react";
+import { Plus, Search, Columns, List } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import DealModal from "@/components/crm/DealModal";
+import PageShell from "@/components/layout/PageShell";
+import BoardViewport from "@/components/layout/BoardViewport";
 
 interface Deal {
   id: string;
@@ -77,217 +79,113 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
   const liveCount = deals.filter((d) => d.stage === "live").length;
   const agreedCount = deals.filter((d) => d.agreementSignedAt).length;
 
-  return (
-    <div className="animate-fade-up" style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+  const viewToggle = (
+    <div style={{ display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, padding: 3 }}>
+      {(["board", "list"] as const).map((v) => (
+        <button key={v} onClick={() => setView(v)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: view === v ? "rgba(99,102,241,0.25)" : "transparent", color: view === v ? "white" : "rgba(255,255,255,0.35)", cursor: "pointer", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
+          {v === "board" ? <Columns size={14} /> : <List size={14} />}
+        </button>
+      ))}
+    </div>
+  );
 
-      {/* ── Header ── */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
-        <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Pipeline</h1>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 3 }}>
-            {deals.length} deals &middot; {formatCurrency(activePipeline)} active &middot; {agreedCount} signed &middot; {liveCount} live
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          {/* View toggle */}
-          <div style={{ display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, padding: 3 }}>
-            {(["board", "list"] as const).map((v) => (
-              <button key={v} onClick={() => setView(v)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: view === v ? "rgba(99,102,241,0.25)" : "transparent", color: view === v ? "white" : "rgba(255,255,255,0.35)", cursor: "pointer", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
-                {v === "board" ? <Columns size={14} /> : <List size={14} />}
-              </button>
-            ))}
-          </div>
+  return (
+    <PageShell
+      title="Pipeline"
+      subtitle={`${deals.length} deals · ${formatCurrency(activePipeline)} active · ${agreedCount} signed · ${liveCount} live`}
+      actions={
+        <>
+          {viewToggle}
           <button onClick={openNew} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.3)" }}>
             <Plus size={15} /> New Deal
           </button>
+        </>
+      }
+      toolbar={
+        <div style={{ position: "relative" }}>
+          <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pipeline..." style={{ width: "100%", maxWidth: 360, padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
         </div>
-      </div>
-
-      {/* ── Search ── */}
-      <div style={{ position: "relative", marginBottom: 20 }}>
-        <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pipeline..." style={{ width: "100%", maxWidth: 360, padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
-      </div>
-
+      }
+    >
       {/* ══ BOARD VIEW ══ */}
       {view === "board" && (
-        <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
-          {/* Scrollable track */}
-          <div style={{
-            display: "flex",
-            gap: 14,
-            overflowX: "auto",
-            overflowY: "hidden",
-            paddingBottom: 28,
-            paddingRight: 80,
-            paddingLeft: 2,
-            paddingTop: 2,
-            alignItems: "flex-start",
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(99,102,241,0.3) transparent",
-          }}>
-            {STAGES.map((stage) => {
-              const stageDeals = filtered.filter((d) => d.stage === stage.key);
-              const total = stageDeals.reduce((s, d) => s + (d.value ?? 0), 0);
-              return (
-                <div key={stage.key} style={{
-                  minWidth: 300,
-                  width: 300,
-                  flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  background: "rgba(255,255,255,0.025)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  maxHeight: "calc(100vh - 260px)",
-                }}>
-                  {/* Lane header */}
-                  <div style={{
-                    padding: "14px 16px",
-                    borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    background: "rgba(255,255,255,0.02)",
-                    flexShrink: 0,
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: stage.color, boxShadow: `0 0 8px ${stage.color}80`, flexShrink: 0 }} />
-                        <span style={{ fontSize: 12.5, fontWeight: 600, color: "rgba(255,255,255,0.9)", letterSpacing: "-0.01em" }}>{stage.label}</span>
-                        <span style={{ fontSize: 10.5, background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)", padding: "2px 7px", borderRadius: 999, fontWeight: 500 }}>{stageDeals.length}</span>
-                      </div>
-                      {total > 0 && (
-                        <span style={{ fontSize: 11, color: stage.color, fontWeight: 600, opacity: 0.8 }}>{formatCurrency(total)}</span>
-                      )}
+        <BoardViewport columnCount={STAGES.length} minColWidth={240} maxColWidth={340}>
+          {STAGES.map((stage) => {
+            const stageDeals = filtered.filter((d) => d.stage === stage.key);
+            const total = stageDeals.reduce((s, d) => s + (d.value ?? 0), 0);
+            return (
+              <div key={stage.key} style={{ display: "flex", flexDirection: "column", background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, overflow: "hidden" }}>
+                {/* Lane header */}
+                <div style={{ padding: "13px 15px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", flexShrink: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: stage.color, boxShadow: `0 0 8px ${stage.color}80`, flexShrink: 0 }} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.9)", letterSpacing: "-0.01em" }}>{stage.label}</span>
+                      <span style={{ fontSize: 10, background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)", padding: "2px 6px", borderRadius: 999, fontWeight: 500 }}>{stageDeals.length}</span>
                     </div>
-                  </div>
-
-                  {/* Lane body — scrollable */}
-                  <div style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "12px 12px 8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 8,
-                    scrollbarWidth: "none",
-                  }}>
-                    {/* Empty state */}
-                    {stageDeals.length === 0 && (
-                      <div style={{ padding: "28px 12px", textAlign: "center", opacity: 0.4 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: "50%", border: `1.5px dashed ${stage.color}60`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
-                          <Plus size={13} color={stage.color} />
-                        </div>
-                        <p style={{ fontSize: 11.5, color: "rgba(255,255,255,0.35)", fontWeight: 500 }}>No deals</p>
-                      </div>
-                    )}
-
-                    {/* Deal cards */}
-                    {stageDeals.map((deal) => (
-                      <div
-                        key={deal.id}
-                        onClick={() => openEdit(deal)}
-                        style={{
-                          padding: "14px 14px 12px",
-                          borderRadius: 12,
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.07)",
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.07)";
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(99,102,241,0.3)";
-                          (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.04)";
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.07)";
-                          (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-                        }}
-                      >
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 6, lineHeight: 1.4, letterSpacing: "-0.01em" }}>{deal.title}</p>
-
-                        {deal.systemType && (
-                          <span style={{ display: "inline-flex", alignItems: "center", fontSize: 10.5, fontWeight: 600, color: systemTypeColor[deal.systemType], background: `${systemTypeColor[deal.systemType].replace("0.9", "0.1")}`, padding: "2px 8px", borderRadius: 6, marginBottom: 8, border: `1px solid ${systemTypeColor[deal.systemType].replace("0.9", "0.2")}` }}>
-                            {systemTypeLabel[deal.systemType]}
-                          </span>
-                        )}
-
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          {deal.monthlyRetainer > 0 && (
-                            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{formatCurrency(deal.monthlyRetainer)}/mo</span>
-                          )}
-                          {deal.value > 0 && (
-                            <span style={{ fontSize: 13, fontWeight: 700, color: stage.color, marginLeft: "auto" }}>{formatCurrency(deal.value)}</span>
-                          )}
-                        </div>
-
-                        {deal.agreementSignedAt && (
-                          <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, color: "#4ade80", fontWeight: 600 }}>
-                            <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 6px #4ade8080" }} />
-                            Signed
-                          </div>
-                        )}
-
-                        {deal.probability > 0 && (
-                          <div style={{ marginTop: 10, height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${deal.probability}%`, background: `linear-gradient(90deg, ${stage.color}80, ${stage.color})`, borderRadius: 3, transition: "width 0.3s ease" }} />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* Add deal button */}
-                    <button
-                      onClick={openNew}
-                      style={{
-                        marginTop: 4,
-                        padding: "9px 14px",
-                        borderRadius: 10,
-                        border: "1px dashed rgba(255,255,255,0.1)",
-                        background: "transparent",
-                        color: "rgba(255,255,255,0.25)",
-                        fontSize: 12,
-                        fontFamily: "inherit",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 6,
-                        transition: "all 0.15s",
-                        width: "100%",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.borderColor = `${stage.color}50`;
-                        (e.currentTarget as HTMLButtonElement).style.color = stage.color;
-                        (e.currentTarget as HTMLButtonElement).style.background = `${stage.color}08`;
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.1)";
-                        (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.25)";
-                        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                      }}
-                    >
-                      <Plus size={12} /> Add deal
-                    </button>
+                    {total > 0 && <span style={{ fontSize: 11, color: stage.color, fontWeight: 600, opacity: 0.8 }}>{formatCurrency(total)}</span>}
                   </div>
                 </div>
-              );
-            })}
-          </div>
 
-          {/* Right fade mask — makes overflow feel intentional */}
-          <div style={{
-            position: "absolute",
-            right: 0,
-            top: 0,
-            bottom: 28,
-            width: 80,
-            background: "linear-gradient(to right, transparent, #07070f)",
-            pointerEvents: "none",
-            zIndex: 2,
-          }} />
-        </div>
+                {/* Lane body */}
+                <div style={{ flex: 1, overflowY: "auto", padding: "10px 10px 8px", display: "flex", flexDirection: "column", gap: 7, scrollbarWidth: "none", minHeight: 120 }}>
+                  {/* Empty state */}
+                  {stageDeals.length === 0 && (
+                    <div style={{ padding: "24px 8px", textAlign: "center", opacity: 0.35 }}>
+                      <div style={{ width: 26, height: 26, borderRadius: "50%", border: `1.5px dashed ${stage.color}70`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
+                        <Plus size={12} color={stage.color} />
+                      </div>
+                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>No deals</p>
+                    </div>
+                  )}
+
+                  {/* Deal cards */}
+                  {stageDeals.map((deal) => (
+                    <div
+                      key={deal.id}
+                      onClick={() => openEdit(deal)}
+                      style={{ padding: "12px 13px 10px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", cursor: "pointer", transition: "all 0.15s ease" }}
+                      onMouseEnter={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.background = "rgba(255,255,255,0.07)"; el.style.borderColor = "rgba(99,102,241,0.3)"; el.style.transform = "translateY(-1px)"; }}
+                      onMouseLeave={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.background = "rgba(255,255,255,0.04)"; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.transform = "translateY(0)"; }}
+                    >
+                      <p style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 5, lineHeight: 1.35, letterSpacing: "-0.01em" }}>{deal.title}</p>
+                      {deal.systemType && (
+                        <span style={{ display: "inline-flex", fontSize: 10, fontWeight: 600, color: systemTypeColor[deal.systemType], background: `${systemTypeColor[deal.systemType].replace("0.9", "0.1")}`, padding: "2px 7px", borderRadius: 6, marginBottom: 6, border: `1px solid ${systemTypeColor[deal.systemType].replace("0.9", "0.18")}` }}>
+                          {systemTypeLabel[deal.systemType]}
+                        </span>
+                      )}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        {deal.monthlyRetainer > 0 && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{formatCurrency(deal.monthlyRetainer)}/mo</span>}
+                        {deal.value > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: stage.color, marginLeft: "auto" }}>{formatCurrency(deal.value)}</span>}
+                      </div>
+                      {deal.agreementSignedAt && (
+                        <div style={{ marginTop: 7, display: "flex", alignItems: "center", gap: 5, fontSize: 10, color: "#4ade80", fontWeight: 600 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 5px #4ade8080" }} /> Signed
+                        </div>
+                      )}
+                      {deal.probability > 0 && (
+                        <div style={{ marginTop: 9, height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${deal.probability}%`, background: `linear-gradient(90deg, ${stage.color}70, ${stage.color})`, borderRadius: 3 }} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add button */}
+                  <button
+                    onClick={openNew}
+                    style={{ marginTop: 2, padding: "8px", borderRadius: 10, border: "1px dashed rgba(255,255,255,0.09)", background: "transparent", color: "rgba(255,255,255,0.22)", fontSize: 11, fontFamily: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, transition: "all 0.15s", width: "100%" }}
+                    onMouseEnter={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = `${stage.color}60`; el.style.color = stage.color; el.style.background = `${stage.color}08`; }}
+                    onMouseLeave={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.22)"; el.style.background = "transparent"; }}
+                  >
+                    <Plus size={12} /> Add deal
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </BoardViewport>
       )}
 
       {/* ══ LIST VIEW ══ */}
@@ -319,9 +217,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
                     <td style={{ padding: "12px 16px" }}>
                       {pill && <span style={{ display: "inline-flex", padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 500, background: pill.bg, color: pill.color, border: `1px solid ${pill.border}` }}>{stage?.label ?? deal.stage}</span>}
                     </td>
-                    <td style={{ padding: "12px 16px", fontSize: 12, color: deal.systemType ? systemTypeColor[deal.systemType] : "rgba(255,255,255,0.25)" }}>
-                      {deal.systemType ? systemTypeLabel[deal.systemType] : "—"}
-                    </td>
+                    <td style={{ padding: "12px 16px", fontSize: 12, color: deal.systemType ? systemTypeColor[deal.systemType] : "rgba(255,255,255,0.25)" }}>{deal.systemType ? systemTypeLabel[deal.systemType] : "—"}</td>
                     <td style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>{deal.setupFee > 0 ? formatCurrency(deal.setupFee) : "—"}</td>
                     <td style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>{deal.monthlyRetainer > 0 ? `${formatCurrency(deal.monthlyRetainer)}/mo` : "—"}</td>
                     <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: stage?.color ?? "white" }}>{deal.value > 0 ? formatCurrency(deal.value) : "—"}</td>
@@ -344,6 +240,6 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
       )}
 
       {modalOpen && <DealModal deal={editing} onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); load(); }} />}
-    </div>
+    </PageShell>
   );
 }
