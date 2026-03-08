@@ -34,4 +34,7 @@ export default [
   route("api/activities", "routes/api.activities.ts"),
   route("api/workspace-settings", "routes/api.workspace-settings.ts"),
   route("api/send-onboarding", "routes/api.send-onboarding.ts"),
+  route("api/calendar", "routes/api.calendar.ts"),
+  route("api/n8n-inbound", "routes/api.n8n-inbound.ts"),
+  route("api/lead-capture", "routes/api.lead-capture.ts"),
 ] satisfies RouteConfig;
