@@ -77,7 +77,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "url": "https://captureos.app/api/n8n-inbound",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -104,7 +104,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://YOUR_APP.vercel.app/api/n8n-inbound",
+        "url": "https://captureos.app/api/n8n-inbound",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
