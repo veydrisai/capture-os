@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, List, Columns } from "lucide-react";
+import { Plus, Search, List, Columns, Upload } from "lucide-react";
 import LeadModal from "@/components/crm/LeadModal";
+import LeadImportModal from "@/components/crm/LeadImportModal";
 
 interface Lead {
   id: string;
@@ -54,6 +55,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   async function load() {
     const res = await fetch("/api/leads");
@@ -80,6 +82,9 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
               </button>
             ))}
           </div>
+          <button onClick={() => setImportOpen(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+            <Upload size={15} /> Import CSV
+          </button>
           <button onClick={() => { setEditing(null); setModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
             <Plus size={15} /> Add Lead
           </button>
@@ -159,6 +164,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
       )}
 
       {modalOpen && <LeadModal lead={editing} onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); load(); }} />}
+      {importOpen && <LeadImportModal onClose={() => setImportOpen(false)} onImported={load} />}
     </div>
   );
 }

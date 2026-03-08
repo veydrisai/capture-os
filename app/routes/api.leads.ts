@@ -12,6 +12,32 @@ export async function loader({ request }: { request: Request }) {
 export async function action({ request }: { request: Request }) {
   const user = await requireUser(request);
   const body = await request.json();
+
+  // Bulk import — body is an array
+  if (Array.isArray(body)) {
+    const values = body
+      .filter((r: any) => r.firstName || r.email)
+      .map((r: any) => ({
+        firstName: r.firstName || "",
+        lastName: r.lastName || "",
+        email: r.email || null,
+        phone: r.phone || null,
+        company: r.company || null,
+        status: "new" as const,
+        source: r.source || "import",
+        industry: r.industry || null,
+        estimatedValue: r.estimatedValue ? parseInt(r.estimatedValue) : 0,
+        systemInterest: r.systemInterest || null,
+        notes: r.notes || null,
+        createdBy: user.id,
+        assignedTo: user.id,
+      }));
+    if (!values.length) return Response.json({ error: "No valid rows" }, { status: 400 });
+    const rows = await db.insert(leads).values(values).returning();
+    return Response.json(rows, { status: 201 });
+  }
+
+  // Single insert
   const [row] = await db.insert(leads).values({
     firstName: body.firstName,
     lastName: body.lastName || "",
