@@ -10,6 +10,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isToday, isSameDay } from "date-fns";
+import PageShell from "@/components/layout/PageShell";
 
 interface GCalEvent {
   id: string;
@@ -79,12 +80,40 @@ export default function CalendarClient({ accessToken }: Props) {
 
   const selectedDayEvents = selectedDay ? dayEvents(selectedDay) : [];
 
+  const navActions = (
+    <>
+      <button
+        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+        style={{ padding: "8px 10px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", cursor: "pointer", display: "flex", alignItems: "center" }}
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <button
+        onClick={() => setCurrentDate(new Date())}
+        style={{ padding: "8px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, cursor: "pointer" }}
+      >
+        Today
+      </button>
+      <button
+        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+        style={{ padding: "8px 10px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", cursor: "pointer", display: "flex", alignItems: "center" }}
+      >
+        <ChevronRight size={16} />
+      </button>
+      <a
+        href="https://calendar.google.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", fontSize: 13, fontWeight: 500, textDecoration: "none" }}
+      >
+        <Plus size={14} /> New Event
+      </a>
+    </>
+  );
+
   if (!accessToken) {
     return (
-      <div className="animate-fade-up">
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Calendar</h1>
-        </div>
+      <PageShell title="Calendar" actions={navActions}>
         <div className="glass" style={{ padding: 48, textAlign: "center" }}>
           <Calendar size={40} color="rgba(255,255,255,0.15)" style={{ margin: "0 auto 16px" }} />
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 15, marginBottom: 8 }}>
@@ -94,50 +123,12 @@ export default function CalendarClient({ accessToken }: Props) {
             Sign out and sign back in to grant calendar access.
           </p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="animate-fade-up">
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-        <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Calendar</h1>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 2 }}>
-            {format(currentDate, "MMMM yyyy")}
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-            style={{ padding: "8px 10px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", cursor: "pointer", display: "flex", alignItems: "center" }}
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button
-            onClick={() => setCurrentDate(new Date())}
-            style={{ padding: "8px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, cursor: "pointer" }}
-          >
-            Today
-          </button>
-          <button
-            onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-            style={{ padding: "8px 10px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", cursor: "pointer", display: "flex", alignItems: "center" }}
-          >
-            <ChevronRight size={16} />
-          </button>
-          <a
-            href="https://calendar.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", fontSize: 13, fontWeight: 500, textDecoration: "none" }}
-          >
-            <Plus size={14} /> New Event
-          </a>
-        </div>
-      </div>
-
+    <PageShell title="Calendar" subtitle={format(currentDate, "MMMM yyyy")} actions={navActions}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
         {/* Calendar Grid */}
         <div className="glass" style={{ overflow: "hidden" }}>
@@ -298,6 +289,6 @@ export default function CalendarClient({ accessToken }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
