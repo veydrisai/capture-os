@@ -47,6 +47,29 @@ In CaptureOS → Settings:
 - Alerts internal team
 - Logs activity in CRM
 
+### 05 — VitalEssence TikTok Content Creator
+**Trigger:** Manual (run on demand in n8n)
+
+Generates a complete TikTok content package for `@vitalessencehealth` from a single run:
+1. **Script** — GPT-4o writes a storytelling/emotional script (hook → problem → discovery → transformation → CTA) for the chosen product
+2. **Score** — GPT-4o judges the script on 5 criteria (score/25). Auto-retries up to 3x until score ≥ 18/25
+3. **Voiceover** — ElevenLabs converts the script to MP3 using Adam voice
+4. **3 Scene Images** — DALL-E 3 generates 9:16 vertical images for each script scene
+5. **Google Drive** — Creates a dated folder and uploads all 5 files (script.txt, voiceover.mp3, scene_01-03.png)
+
+**Products supported:** `vitamins` · `gut_health` · `nobs_toothpaste`
+
+**Setup required (before first run):**
+1. Create a `VitalEssence Content` folder in Google Drive — copy its folder ID
+2. Replace `GOOGLE_DRIVE_PARENT_FOLDER_ID` in the JSON (2 occurrences) with that folder ID
+3. Add n8n environment variables: `OPENAI_API_KEY`, `ELEVENLABS_API_KEY`
+4. Add n8n credentials: `openai-cred` (OpenAI API type) · `gdrive-cred` (Google Drive OAuth2, scope: drive.file)
+5. Edit the **Set - Content Request** node to set your `product`, `topic`, and `target_audience` before each run
+
+**Output:** Google Drive folder `YYYY-MM-DD - {product} - {topic}/` containing all 5 assets
+
+---
+
 ### 03 — Client Live + Weekly ROI Reports
 **Trigger A:** Client onboarding status → `live`
 - Emails go-live celebration to client with ROI dashboard link
