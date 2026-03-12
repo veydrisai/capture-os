@@ -12,29 +12,40 @@ export async function action({ request }: { request: Request }) {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const data = body as Record<string, unknown>;
 
   // Only process booking creations
-  if (body.triggerEvent !== "BOOKING_CREATED") {
+  if (data.triggerEvent !== "BOOKING_CREATED") {
     return Response.json({ ok: true, skipped: true });
   }
 
-  const payload = body.payload;
-  const attendee = payload?.attendees?.[0];
+  try {
+  const payload = data.payload as Record<string, unknown> | undefined;
+  const attendees = payload?.attendees as Array<Record<string, string>> | undefined;
+  const attendee = attendees?.[0];
 
   if (!attendee?.email) {
     return Response.json({ error: "No attendee email in payload" }, { status: 400 });
   }
 
-  const firstName = attendee.firstName || attendee.name?.split(" ")[0] || "";
-  const lastName = attendee.lastName || attendee.name?.split(" ").slice(1).join(" ") || "";
-  const email = attendee.email;
-  const phone = payload.responses?.phone?.value || payload.userFieldsResponses?.phone?.value || null;
-  const company = payload.responses?.company?.value || payload.userFieldsResponses?.company?.value || null;
+  const firstName = attendee?.firstName || attendee?.name?.split(" ")[0] || "Unknown";
+  const lastName = attendee?.lastName || attendee?.name?.split(" ").slice(1).join(" ") || "";
+  const email = attendee?.email ?? "";
+  const responses = payload?.responses as Record<string, { value: string }> | undefined;
+  const userFieldsResponses = payload?.userFieldsResponses as Record<string, { value: string }> | undefined;
+  const phone = responses?.phone?.value || userFieldsResponses?.phone?.value || null;
+  const company = responses?.company?.value || userFieldsResponses?.company?.value || null;
   const VALID_SYSTEM_TYPES = ["reactivation", "hot_lead", "backend", "combo"] as const;
-  const rawInterest = payload.responses?.systemInterest?.value || payload.userFieldsResponses?.systemInterest?.value;
-  const systemInterest = VALID_SYSTEM_TYPES.includes(rawInterest) ? rawInterest as typeof VALID_SYSTEM_TYPES[number] : null;
-  const notes = `Cal.com booking — ${payload.title ?? "Call"} on ${payload.startTime ?? "TBD"}${rawInterest ? ` | Interested in: ${rawInterest}` : ""}`;
+  const rawInterest = responses?.systemInterest?.value || userFieldsResponses?.systemInterest?.value;
+  const systemInterest = rawInterest && VALID_SYSTEM_TYPES.includes(rawInterest as typeof VALID_SYSTEM_TYPES[number]) ? rawInterest as typeof VALID_SYSTEM_TYPES[number] : null;
+  const notes = `Cal.com booking — ${(payload?.title as string) ?? "Call"} on ${(payload?.startTime as string) ?? "TBD"}${rawInterest ? ` | Interested in: ${rawInterest}` : ""}`;
 
   // Create lead in DB
   const [row] = await db.insert(leads).values({
@@ -104,4 +115,8 @@ export async function action({ request }: { request: Request }) {
   }
 
   return Response.json({ ok: true, leadId: row.id });
+  } catch (err) {
+    console.error("[cal-webhook] Error:", err);
+    return Response.json({ error: String(err) }, { status: 500 });
+  }
 }
