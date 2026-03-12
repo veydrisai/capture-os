@@ -31,8 +31,10 @@ export async function action({ request }: { request: Request }) {
   const email = attendee.email;
   const phone = payload.responses?.phone?.value || payload.userFieldsResponses?.phone?.value || null;
   const company = payload.responses?.company?.value || payload.userFieldsResponses?.company?.value || null;
-  const systemInterest = payload.responses?.systemInterest?.value || payload.userFieldsResponses?.systemInterest?.value || payload.eventTitle || "Discovery Call";
-  const notes = `Cal.com booking — ${payload.title ?? "Call"} on ${payload.startTime ?? "TBD"}`;
+  const VALID_SYSTEM_TYPES = ["reactivation", "hot_lead", "backend", "combo"] as const;
+  const rawInterest = payload.responses?.systemInterest?.value || payload.userFieldsResponses?.systemInterest?.value;
+  const systemInterest = VALID_SYSTEM_TYPES.includes(rawInterest) ? rawInterest as typeof VALID_SYSTEM_TYPES[number] : null;
+  const notes = `Cal.com booking — ${payload.title ?? "Call"} on ${payload.startTime ?? "TBD"}${rawInterest ? ` | Interested in: ${rawInterest}` : ""}`;
 
   // Create lead in DB
   const [row] = await db.insert(leads).values({
