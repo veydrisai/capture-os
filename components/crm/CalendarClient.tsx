@@ -4,50 +4,56 @@ import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
+  ExternalLink,
   Calendar,
   Clock,
-  ExternalLink,
+  User,
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isToday, isSameDay } from "date-fns";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  startOfWeek,
+  endOfWeek,
+  isSameMonth,
+  isToday,
+  isSameDay,
+} from "date-fns";
 import PageShell from "@/components/layout/PageShell";
 
-interface GCalEvent {
-  id: string;
-  summary: string;
-  start: { dateTime?: string; date?: string };
-  end: { dateTime?: string; date?: string };
-  htmlLink: string;
+interface CalBooking {
+  id: number;
+  uid: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  attendees: Array<{ name: string; email: string }>;
   description?: string;
   location?: string;
-  colorId?: string;
 }
 
-interface Props {
-  accessToken: string | null;
-}
-
-const COLORS: Record<string, string> = {
-  "1": "#a4bdfc", "2": "#7ae7bf", "3": "#dbadff", "4": "#ff887c",
-  "5": "#fbd75b", "6": "#ffb878", "7": "#46d6db", "8": "#e1e1e1",
-  "9": "#5484ed", "10": "#51b749", "11": "#dc2127",
+const STATUS_COLORS: Record<string, string> = {
+  ACCEPTED: "#6ee7b7",
+  PENDING: "#fbbf24",
+  CANCELLED: "#fca5a5",
+  REJECTED: "#fca5a5",
 };
 
-export default function CalendarClient({ accessToken }: Props) {
+export default function CalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState<GCalEvent[]>([]);
+  const [bookings, setBookings] = useState<CalBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!accessToken) return;
-    fetchEvents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate, accessToken]);
+    fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDate]);
 
-  async function fetchEvents() {
-    if (!accessToken) return;
+  async function fetchBookings() {
     setLoading(true);
     setError("");
     try {
@@ -56,11 +62,11 @@ export default function CalendarClient({ accessToken }: Props) {
       const res = await fetch(
         `/api/calendar?timeMin=${encodeURIComponent(start)}&timeMax=${encodeURIComponent(end)}`
       );
-      if (!res.ok) throw new Error("Failed to fetch calendar");
+      if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
-      setEvents(data.items ?? []);
+      setBookings(data.items ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error loading calendar");
+      setError(err instanceof Error ? err.message : "Error loading bookings");
     } finally {
       setLoading(false);
     }
@@ -72,13 +78,10 @@ export default function CalendarClient({ accessToken }: Props) {
   const calEnd = endOfWeek(monthEnd);
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
 
-  const dayEvents = (day: Date) =>
-    events.filter((e) => {
-      const d = e.start.dateTime ?? e.start.date ?? "";
-      return isSameDay(new Date(d), day);
-    });
+  const dayBookings = (day: Date) =>
+    bookings.filter((b) => isSameDay(new Date(b.startTime), day));
 
-  const selectedDayEvents = selectedDay ? dayEvents(selectedDay) : [];
+  const selectedDayBookings = selectedDay ? dayBookings(selectedDay) : [];
 
   const navActions = (
     <>
@@ -101,38 +104,21 @@ export default function CalendarClient({ accessToken }: Props) {
         <ChevronRight size={16} />
       </button>
       <a
-        href="https://calendar.google.com"
+        href="https://app.cal.com/bookings/upcoming"
         target="_blank"
         rel="noopener noreferrer"
         style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", fontSize: 13, fontWeight: 500, textDecoration: "none" }}
       >
-        <Plus size={14} /> New Event
+        <ExternalLink size={14} /> Cal.com
       </a>
     </>
   );
-
-  if (!accessToken) {
-    return (
-      <PageShell title="Calendar" actions={navActions}>
-        <div className="glass" style={{ padding: 48, textAlign: "center" }}>
-          <Calendar size={40} color="rgba(255,255,255,0.15)" style={{ margin: "0 auto 16px" }} />
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 15, marginBottom: 8 }}>
-            Google Calendar not connected
-          </p>
-          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>
-            Sign out and sign back in to grant calendar access.
-          </p>
-        </div>
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell title="Calendar" subtitle={format(currentDate, "MMMM yyyy")} actions={navActions}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
         {/* Calendar Grid */}
         <div className="glass" style={{ overflow: "hidden" }}>
-          {/* Day headers */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
               <div key={d} style={{ padding: "10px 0", textAlign: "center", fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.35)", letterSpacing: "0.05em" }}>
@@ -141,10 +127,9 @@ export default function CalendarClient({ accessToken }: Props) {
             ))}
           </div>
 
-          {/* Days */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
             {days.map((day, i) => {
-              const evs = dayEvents(day);
+              const evs = dayBookings(day);
               const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
               const inMonth = isSameMonth(day, currentDate);
               const today = isToday(day);
@@ -164,40 +149,13 @@ export default function CalendarClient({ accessToken }: Props) {
                   onMouseEnter={(e) => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.03)"; }}
                   onMouseLeave={(e) => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                 >
-                  <div
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 12,
-                      fontWeight: today ? 600 : 400,
-                      color: today ? "white" : inMonth ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)",
-                      background: today ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "transparent",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: today ? 600 : 400, color: today ? "white" : inMonth ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)", background: today ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "transparent", marginBottom: 4 }}>
                     {format(day, "d")}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    {evs.slice(0, 2).map((ev) => (
-                      <div
-                        key={ev.id}
-                        style={{
-                          padding: "1px 5px",
-                          borderRadius: 4,
-                          fontSize: 10,
-                          fontWeight: 500,
-                          background: COLORS[ev.colorId ?? ""] ? `${COLORS[ev.colorId!]}22` : "rgba(99,102,241,0.2)",
-                          color: COLORS[ev.colorId ?? ""] ?? "#a5b4fc",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {ev.summary}
+                    {evs.slice(0, 2).map((b) => (
+                      <div key={b.id} style={{ padding: "1px 5px", borderRadius: 4, fontSize: 10, fontWeight: 500, background: `${STATUS_COLORS[b.status] ?? "#6ee7b7"}22`, color: STATUS_COLORS[b.status] ?? "#6ee7b7", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {b.attendees[0]?.name ?? b.title}
                       </div>
                     ))}
                     {evs.length > 2 && (
@@ -211,7 +169,7 @@ export default function CalendarClient({ accessToken }: Props) {
 
           {loading && (
             <div style={{ padding: "12px", textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.3)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-              Loading events...
+              Loading bookings...
             </div>
           )}
           {error && (
@@ -229,61 +187,41 @@ export default function CalendarClient({ accessToken }: Props) {
 
           {!selectedDay && (
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", textAlign: "center", marginTop: 32 }}>
-              Click a day to see events
+              Click a day to see bookings
             </p>
           )}
 
-          {selectedDay && selectedDayEvents.length === 0 && (
+          {selectedDay && selectedDayBookings.length === 0 && (
             <div style={{ textAlign: "center", marginTop: 32 }}>
               <Calendar size={28} color="rgba(255,255,255,0.12)" style={{ margin: "0 auto 8px" }} />
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)" }}>No events</p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)" }}>No bookings</p>
             </div>
           )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {selectedDayEvents.map((ev) => {
-              const startTime = ev.start.dateTime
-                ? format(new Date(ev.start.dateTime), "h:mm a")
-                : "All day";
-              const endTime = ev.end.dateTime
-                ? format(new Date(ev.end.dateTime), "h:mm a")
-                : "";
+            {selectedDayBookings.map((b) => {
+              const startTime = format(new Date(b.startTime), "h:mm a");
+              const endTime = format(new Date(b.endTime), "h:mm a");
+              const statusColor = STATUS_COLORS[b.status] ?? "#6ee7b7";
               return (
-                <a
-                  key={ev.id}
-                  href={ev.htmlLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "block",
-                    padding: "12px",
-                    borderRadius: 10,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    textDecoration: "none",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.07)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.04)"; }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                    <p style={{ fontSize: 13, fontWeight: 500, color: "white", lineHeight: 1.4, flex: 1 }}>
-                      {ev.summary}
-                    </p>
-                    <ExternalLink size={11} color="rgba(255,255,255,0.25)" style={{ flexShrink: 0, marginTop: 2 }} />
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 6 }}>
-                    <Clock size={11} color="rgba(255,255,255,0.3)" />
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>
-                      {startTime}{endTime ? ` – ${endTime}` : ""}
+                <div key={b.id} style={{ padding: "12px", borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
+                    <p style={{ fontSize: 13, fontWeight: 500, color: "white", lineHeight: 1.4, flex: 1 }}>{b.title}</p>
+                    <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: `${statusColor}22`, color: statusColor, whiteSpace: "nowrap" }}>
+                      {b.status}
                     </span>
                   </div>
-                  {ev.location && (
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>
-                      📍 {ev.location}
-                    </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
+                    <Clock size={11} color="rgba(255,255,255,0.3)" />
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{startTime} – {endTime}</span>
+                  </div>
+                  {b.attendees[0] && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <User size={11} color="rgba(255,255,255,0.3)" />
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{b.attendees[0].name} · {b.attendees[0].email}</span>
+                    </div>
                   )}
-                </a>
+                </div>
               );
             })}
           </div>
