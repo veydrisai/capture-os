@@ -37,4 +37,5 @@ export default [
   route("api/calendar", "routes/api.calendar.ts"),
   route("api/n8n-inbound", "routes/api.n8n-inbound.ts"),
   route("api/lead-capture", "routes/api.lead-capture.ts"),
+  route("api/cal-webhook", "routes/api.cal-webhook.ts"),
 ] satisfies RouteConfig;
