@@ -31,7 +31,7 @@ export default function BoardViewport({
 }: BoardViewportProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
-  const [needsScroll, setNeedsScroll] = useState(false);
+  const [needsScroll, setNeedsScroll] = useState(true); // default true — avoids grid overflow on first paint
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -75,7 +75,7 @@ export default function BoardViewport({
   };
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative", width: "100%" }}>
+    <div ref={wrapperRef} style={{ position: "relative", width: "100%", overflow: "hidden" }}>
       <div style={needsScroll ? flexStyle : gridStyle}>
         {/* Inject lane sizing via CSS custom props */}
         {React.Children.map(children, (child) => {
@@ -84,7 +84,7 @@ export default function BoardViewport({
             style: {
               ...(child as React.ReactElement<any>).props.style,
               ...(needsScroll
-                ? { minWidth: minColWidth, maxWidth: maxColWidth, flex: "0 0 auto", width: availableWidth > 0 ? `${Math.min(maxColWidth, Math.floor((availableWidth - GAP * (columnCount - 1)) / Math.min(columnCount, Math.floor(availableWidth / minColWidth))))}px` : minColWidth }
+                ? { flex: `0 0 ${minColWidth}px`, width: minColWidth, minWidth: minColWidth, maxWidth: maxColWidth }
                 : { minWidth: 0, flex: 1 }
               ),
             },

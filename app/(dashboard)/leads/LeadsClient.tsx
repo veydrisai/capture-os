@@ -122,13 +122,14 @@ function CardContent({ lead, stageColor }: { lead: Lead; stageColor: string }) {
 
 // ─── Droppable Column ─────────────────────────────────────────────────────────
 
-function DroppableColumn({ stage, children }: { stage: typeof STAGES[number]; children: React.ReactNode }) {
+function DroppableColumn({ stage, children, style }: { stage: typeof STAGES[number]; children: React.ReactNode; style?: React.CSSProperties }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.key });
 
   return (
     <div
       ref={setNodeRef}
       style={{
+        ...style,
         display: "flex",
         flexDirection: "column",
         background: isOver ? "rgba(99,102,241,0.08)" : "rgba(255,255,255,0.025)",
@@ -257,12 +258,12 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
             autoScroll={{
               enabled: true,
               threshold: { x: 0.15, y: 0.1 },
-              interval: 5,
-              acceleration: 12,
+              interval: 50,
+              acceleration: 8,
             }}
           >
             <div ref={boardRef}>
-              <BoardViewport columnCount={STAGES.length} minColWidth={220} maxColWidth={320}>
+              <BoardViewport columnCount={STAGES.length} minColWidth={240} maxColWidth={320}>
                 {STAGES.map((stage) => {
                   const stageLeads = filtered.filter((l) => l.status === stage.key);
                   return (
