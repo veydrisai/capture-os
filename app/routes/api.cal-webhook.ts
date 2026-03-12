@@ -1,6 +1,5 @@
 import { db } from "@/lib/db";
 import { leads } from "@/drizzle/schema";
-import nodemailer from "nodemailer";
 
 /**
  * Cal.com webhook endpoint — receives BOOKING_CREATED events directly.
@@ -61,25 +60,23 @@ export async function action({ request }: { request: Request }) {
     status: "new",
   }).returning();
 
-  // Send internal alert email
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const alertTo = process.env.INTERNAL_ALERT_EMAIL ?? smtpUser;
+  // Send internal alert email via Resend
+  const resendKey = process.env.RESEND_API_KEY;
+  const alertTo = process.env.INTERNAL_ALERT_EMAIL ?? "michael@revenuecs.com";
 
-  if (smtpUser && smtpPass) {
+  if (resendKey) {
     try {
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: { user: smtpUser, pass: smtpPass },
-      });
-
-      await transporter.sendMail({
-        from: smtpUser,
-        to: alertTo,
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "RevenueCS <alerts@revenuecs.com>",
+          to: [alertTo],
         subject: `🔥 New discovery call booked — ${firstName} ${lastName}`,
-        html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+          html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
 <tr><td style="background:#0f0f0f;padding:28px 40px;">
@@ -108,6 +105,7 @@ export async function action({ request }: { request: Request }) {
   <p style="margin:0;font-size:13px;color:#9ca3af;">RevenueCS — captureos.app</p>
 </td></tr>
 </table></td></tr></table></body></html>`,
+        }),
       });
     } catch (err) {
       console.error("[cal-webhook] Email send failed:", err);
