@@ -12,6 +12,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const body = await req.json();
 
+  const [existing] = await db.select().from(leads).where(eq(leads.id, id));
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.createdBy !== session.user.id && existing.assignedTo !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const [row] = await db
     .update(leads)
     .set({
@@ -40,6 +46,13 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+
+  const [existing] = await db.select().from(leads).where(eq(leads.id, id));
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.createdBy !== session.user.id && existing.assignedTo !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   await db.delete(leads).where(eq(leads.id, id));
   revalidateTag("leads");
   return NextResponse.json({ ok: true });

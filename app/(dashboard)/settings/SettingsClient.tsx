@@ -16,19 +16,27 @@ export default function SettingsClient({ user, initialSettings }: Props) {
   const [ws, setWs] = useState(initialSettings);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
-    await fetch("/api/workspace-settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(ws),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/workspace-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ws),
+      });
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -100,6 +108,7 @@ export default function SettingsClient({ user, initialSettings }: Props) {
                 <Save size={13} /> {saving ? "Saving..." : "Save Settings"}
               </button>
               {saved && <span style={{ fontSize: 12, color: "#86efac" }}>Saved ✓</span>}
+              {saveError && <span style={{ fontSize: 12, color: "#fca5a5" }}>{saveError}</span>}
             </div>
           </form>
         </div>

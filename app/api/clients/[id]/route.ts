@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { clients } from "@/drizzle/schema";
+import { clients, workspaceSettings } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -11,6 +11,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const body = await req.json();
+
+  // Fetch existing to detect go-live transition
+  const [existing] = await db.select().from(clients).where(eq(clients.id, id));
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.createdBy !== session.user.id && existing.assignedTo !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const updates: Record<string, unknown> = { updatedAt: new Date() };
 
@@ -40,6 +47,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [row] = await db.update(clients).set(updates as any).where(eq(clients.id, id)).returning();
+
+  // Fire go-live webhook when onboardingStatus transitions to "live"
+  if (body.onboardingStatus === "live" && existing?.onboardingStatus !== "live") {
+    try {
+      const [ws] = await db.select().from(workspaceSettings).limit(1);
+      if (ws?.n8nWebhookUrl) {
+        fetch(`${ws.n8nWebhookUrl}/client-live`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event: "client.live",
+            clientId: row.id,
+            businessName: row.businessName,
+            email: row.email ?? "",
+            systemType: row.systemType,
+            monthlyRetainer: row.monthlyRetainer,
+            roiDashboardUrl: row.roiDashboardUrl ?? "",
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch((err) => console.error("n8n client.live webhook failed:", err));
+      }
+    } catch (err) {
+      console.error("go-live automation failed:", err);
+    }
+  }
+
   revalidateTag("clients"); revalidateTag("dashboard");
   return NextResponse.json(row);
 }
@@ -49,6 +82,13 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+
+  const [existing] = await db.select().from(clients).where(eq(clients.id, id));
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.createdBy !== session.user.id && existing.assignedTo !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   await db.delete(clients).where(eq(clients.id, id));
   revalidateTag("clients"); revalidateTag("dashboard");
   return NextResponse.json({ ok: true });

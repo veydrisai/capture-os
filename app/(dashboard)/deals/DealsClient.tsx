@@ -65,10 +65,16 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
   const [view, setView] = useState<"board" | "list">("board");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Deal | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const res = await fetch("/api/deals");
-    if (res.ok) setDeals(await res.json());
+    try {
+      const res = await fetch("/api/deals");
+      if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
+      setDeals(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    }
   }
 
   function openNew() { setEditing(null); setModalOpen(true); }
@@ -90,6 +96,12 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
   );
 
   return (
+    <>
+      {error && (
+        <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#fca5a5" }}>
+          {error}
+        </div>
+      )}
     <PageShell
       title="Pipeline"
       subtitle={`${deals.length} deals · ${formatCurrency(activePipeline)} active · ${agreedCount} signed · ${liveCount} live`}
@@ -241,5 +253,6 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
 
       {modalOpen && <DealModal deal={editing} onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); load(); }} />}
     </PageShell>
+    </>
   );
 }

@@ -5,11 +5,16 @@ import { db } from "@/lib/db";
 import { deals } from "@/drizzle/schema";
 import { desc } from "drizzle-orm";
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const rows = await db.select().from(deals).orderBy(desc(deals.createdAt));
+  const { searchParams } = new URL(req.url);
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 200);
+  const page = Math.max(parseInt(searchParams.get("page") ?? "1"), 1);
+  const offset = (page - 1) * limit;
+
+  const rows = await db.select().from(deals).orderBy(desc(deals.createdAt)).limit(limit).offset(offset);
   return NextResponse.json(rows, {
     headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=30" },
   });

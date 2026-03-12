@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { deals, workspaceSettings } from "@/drizzle/schema";
+import { deals, workspaceSettings, contacts, clients } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +24,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   // Fetch existing to check stage transition
   const [existing] = await db.select().from(deals).where(eq(deals.id, id));
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.createdBy !== session.user.id && existing.assignedTo !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const now = new Date();
   const updates: Record<string, unknown> = {
@@ -57,28 +61,70 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [row] = await db.update(deals).set(updates as any).where(eq(deals.id, id)).returning();
 
-  // Fire Make.com webhook when deal moves to agreement_signed (only once)
+  // Fire automations when deal moves to agreement_signed (only once)
   if (body.stage === "agreement_signed" && existing?.stage !== "agreement_signed" && !existing?.webhookFired) {
     try {
       const [ws] = await db.select().from(workspaceSettings).limit(1);
-      if (ws?.makeWebhookUrl) {
-        await fetch(ws.makeWebhookUrl, {
+
+      // Fetch contact details for email payloads
+      let contact: { firstName: string; lastName: string; email: string | null; company: string | null } | null = null;
+      if (row.contactId) {
+        const [c] = await db.select().from(contacts).where(eq(contacts.id, row.contactId));
+        if (c) contact = c;
+      }
+
+      const contactName = contact ? `${contact.firstName} ${contact.lastName}`.trim() : row.title;
+      const contactEmail = contact?.email ?? "";
+      const businessName = contact?.company || row.title;
+
+      // Auto-create client record
+      const [newClient] = await db.insert(clients).values({
+        dealId: row.id,
+        contactId: row.contactId ?? null,
+        businessName,
+        email: contactEmail || null,
+        systemType: row.systemType ?? null,
+        monthlyRetainer: row.monthlyRetainer ?? 0,
+        onboardingStatus: "pending",
+        createdBy: session.user.id,
+        assignedTo: session.user.id,
+      }).returning();
+
+      if (ws?.n8nWebhookUrl) {
+        const basePayload = {
+          event: "deal.agreement_signed",
+          dealId: row.id,
+          dealTitle: row.title,
+          clientId: newClient.id,
+          contactName,
+          contactEmail,
+          systemType: row.systemType,
+          setupFee: row.setupFee,
+          monthlyRetainer: row.monthlyRetainer,
+          agreementTemplateUrl: ws.agreementTemplateUrl ?? "",
+          intakeFormUrl: ws.intakeFormUrl ?? "",
+          timestamp: now.toISOString(),
+        };
+
+        // Fire Workflow #01 — sends agreement email to prospect
+        fetch(`${ws.n8nWebhookUrl}/deal-proposal-sent`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: "agreement_signed",
-            dealId: row.id,
-            dealTitle: row.title,
-            systemType: row.systemType,
-            setupFee: row.setupFee,
-            monthlyRetainer: row.monthlyRetainer,
-            timestamp: now.toISOString(),
-          }),
-        });
-        await db.update(deals).set({ webhookFired: true }).where(eq(deals.id, id));
+          body: JSON.stringify(basePayload),
+        }).catch((err) => console.error("n8n workflow #01 failed:", err));
+
+        // Fire Workflow #02 — sends intake form + welcome email
+        fetch(`${ws.n8nWebhookUrl}/deal-agreement-signed`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(basePayload),
+        }).catch((err) => console.error("n8n workflow #02 failed:", err));
       }
+
+      await db.update(deals).set({ webhookFired: true }).where(eq(deals.id, id));
+      revalidateTag("clients");
     } catch (err) {
-      console.error("Make webhook failed:", err);
+      console.error("agreement_signed automation failed:", err);
     }
   }
 
@@ -91,6 +137,13 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+
+  const [existing] = await db.select().from(deals).where(eq(deals.id, id));
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.createdBy !== session.user.id && existing.assignedTo !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   await db.delete(deals).where(eq(deals.id, id));
   revalidateTag("deals"); revalidateTag("dashboard");
   return NextResponse.json({ ok: true });

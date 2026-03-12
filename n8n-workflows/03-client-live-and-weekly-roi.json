@@ -12,25 +12,40 @@
       "name": "Webhook - Client Live",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 200]
+      "position": [
+        240,
+        200
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.event }}",
-              "operation": "equals",
-              "value2": "client.live"
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "client.live",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
-          ]
+          ],
+          "combinator": "and"
         }
       },
       "id": "filter-live",
       "name": "Filter - client.live only",
       "type": "n8n-nodes-base.filter",
-      "typeVersion": 1,
-      "position": [460, 200]
+      "typeVersion": 2,
+      "position": [
+        460,
+        200
+      ]
     },
     {
       "parameters": {
@@ -38,18 +53,21 @@
         "toEmail": "={{ $json.email }}",
         "subject": "You're live. The system is dialing.",
         "emailFormat": "html",
-        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#86efac;text-transform:uppercase;\">RevenueCS — System Live</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">Your {{ $json.systemType }} system is live.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.businessName }} team,</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">The system is running. Calls are going out. This is where the work starts paying off.</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">Track every call, booking, and dollar attributed to the system in real-time on your ROI dashboard:</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:28px;\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.roiDashboardUrl }}\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;\">Open Your ROI Dashboard →</a>\n  </td></tr></table>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 8px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">What to watch</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\">• Call connect rate — target above 30%</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\">• Demo book rate — target 8–15%</p>\n      <p style=\"margin:0;font-size:14px;color:#111827;\">• No-show rate — keep below 25%</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;line-height:1.6;\">We monitor daily. You'll get a weekly report every Monday. If anything needs adjusting, we're on it before you even notice.</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael — RevenueCS &nbsp;·&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#86efac;text-transform:uppercase;\">RevenueCS \u2014 System Live</p>\n  <h1 style=\"margin:8px 0 0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.3;\">You're live. The system is dialing.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.businessName }} team,</p>\n  <p style=\"margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;\">This is the moment everything's been building toward. Your <strong>{{ $json.systemType }}</strong> system is fully configured, tested, and live. As of right now the system is actively working your contact list \u2014 reaching out, qualifying, and booking appointments automatically, around the clock.</p>\n  <p style=\"margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;\">Your ROI dashboard is live and tracking every interaction in real time. This is your command center \u2014 check it any time to see exactly what the system is doing for your business:</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:32px;\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.roiDashboardUrl }}\" style=\"display:inline-block;padding:14px 32px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;\">Open Your ROI Dashboard &#8594;</a>\n  </td></tr></table>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">What to expect in the first 7 days</p>\n      <p style=\"margin:0 0 8px;font-size:14px;color:#111827;\">&#128222; <strong>Days 1\u20132:</strong> System warms up \u2014 call volume starts lower while we verify connect rates</p>\n      <p style=\"margin:0 0 8px;font-size:14px;color:#111827;\">&#128200; <strong>Days 3\u20135:</strong> Volume increases, first bookings typically start coming in</p>\n      <p style=\"margin:0 0 8px;font-size:14px;color:#111827;\">&#9989; <strong>Days 5\u20137:</strong> Full throughput \u2014 the system is running at full capacity</p>\n      <p style=\"margin:0;font-size:13px;color:#6b7280;\">If the first day looks quiet, that's normal. Warmup is intentional \u2014 we'd rather start clean than burn your list on day one.</p>\n    </td></tr>\n  </table>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">Numbers to watch</p>\n      <p style=\"margin:0 0 6px;font-size:14px;color:#111827;\"><strong>Call connect rate</strong> \u2014 healthy target is above 30%</p>\n      <p style=\"margin:0 0 6px;font-size:14px;color:#111827;\"><strong>Demo book rate</strong> \u2014 we aim for 8\u201315% of connected calls booking</p>\n      <p style=\"margin:0 0 6px;font-size:14px;color:#111827;\"><strong>No-show rate</strong> \u2014 we work to keep this below 25%</p>\n      <p style=\"margin:10px 0 0;font-size:13px;color:#6b7280;\">If you see anything look off in the first week, reply to this email immediately. We review numbers daily and make script and targeting adjustments before they become real problems.</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;\">You'll get a weekly performance report every Monday morning. We're watching the system every day \u2014 if anything needs tuning, we're on it before you have to ask.</p>\n  <p style=\"margin:0 0 4px;font-size:14px;color:#374151;\">Let's get those bookings in.</p>\n  <p style=\"margin:0;font-size:14px;color:#374151;\">\u2014 Michael</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael \u2014 RevenueCS &nbsp;&#183;&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "email-golive-client",
       "name": "Email - Go-Live to Client",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [680, 100],
+      "position": [
+        680,
+        100
+      ],
       "credentials": {
         "smtp": {
-          "id": "smtp-cred",
-          "name": "SMTP"
+          "id": "LViY7g19KwnPtnEG",
+          "name": "SMTP account 2"
         }
       }
     },
@@ -57,20 +75,23 @@
       "parameters": {
         "fromEmail": "michael@revenuecs.com",
         "toEmail": "michael@revenuecs.com",
-        "subject": "🚀 Client Live — {{ $json.businessName }} | {{ $json.systemType }}",
+        "subject": "&#128640; Client Live \u2014 {{ $json.businessName }} | {{ $json.systemType }}",
         "emailFormat": "html",
-        "message": "<p><strong>{{ $json.businessName }}</strong> is now LIVE on the <strong>{{ $json.systemType }}</strong> system.</p><p><strong>MRR:</strong> ${{ $json.monthlyRetainer }}/mo<br/><strong>ROI Dashboard:</strong> {{ $json.roiDashboardUrl }}</p><p>Begin weekly ROI reports starting this Monday.</p>",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:32px 20px;\">\n<table width=\"540\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n<tr><td style=\"background:#0c4a6e;padding:24px 32px;\">\n  <p style=\"margin:0;font-size:11px;font-weight:700;letter-spacing:0.12em;color:#7dd3fc;text-transform:uppercase;\">Client Live \u2014 RevenueCS</p>\n  <h2 style=\"margin:6px 0 0;font-size:18px;font-weight:700;color:#ffffff;\">&#128640; {{ $json.businessName }} is live.</h2>\n</td></tr>\n<tr><td style=\"padding:28px 32px;\">\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border-radius:8px;width:100%;margin-bottom:20px;\">\n    <tr><td style=\"padding:16px 20px;\">\n      <p style=\"margin:0 0 10px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">Client Info</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>Business:</strong> {{ $json.businessName }}</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>Email:</strong> {{ $json.email }}</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>System:</strong> {{ $json.systemType }}</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>MRR:</strong> ${{ $json.monthlyRetainer }}/mo</p>\n      <p style=\"margin:0;font-size:14px;color:#6b7280;\"><strong>ROI Dashboard:</strong> <a href=\"{{ $json.roiDashboardUrl }}\" style=\"color:#6366f1;\">open dashboard</a></p>\n    </td></tr>\n  </table>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#e0f2fe;border:1px solid #7dd3fc;border-radius:8px;width:100%;margin-bottom:20px;\">\n    <tr><td style=\"padding:14px 20px;\">\n      <p style=\"margin:0 0 4px;font-size:13px;font-weight:700;color:#0c4a6e;\">Monitoring checklist</p>\n      <p style=\"margin:0 0 4px;font-size:13px;color:#0c4a6e;\">&#9744; Review connect rate after Day 2 (target: &gt;30%)</p>\n      <p style=\"margin:0 0 4px;font-size:13px;color:#0c4a6e;\">&#9744; Check first booking came in by Day 5</p>\n      <p style=\"margin:0 0 4px;font-size:13px;color:#0c4a6e;\">&#9744; Weekly ROI report will begin next Monday automatically</p>\n      <p style=\"margin:0;font-size:13px;color:#0c4a6e;\">&#9744; Flag any anomalies \u2014 no-show spike, low connect rate \u2014 before Day 7</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Go-live email sent to client. Weekly ROI reports will start automatically this Monday.</p>\n</td></tr>\n</table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "email-golive-internal",
       "name": "Email - Go-Live Internal",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [680, 280],
+      "position": [
+        680,
+        280
+      ],
       "credentials": {
         "smtp": {
-          "id": "smtp-cred",
-          "name": "SMTP"
+          "id": "LViY7g19KwnPtnEG",
+          "name": "SMTP account 2"
         }
       }
     },
@@ -81,8 +102,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-n8n-secret", "value": "revenuecssecret" },
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "x-n8n-secret",
+              "value": "revenuecssecret"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -90,7 +117,7 @@
         "body": {
           "action": "create_activity",
           "type": "note",
-          "title": "Client went live — go-live email sent",
+          "title": "Client went live \u2014 go-live email sent",
           "body": "Auto-triggered by n8n. Go-live email sent to client.",
           "clientId": "={{ $json.clientId }}"
         },
@@ -100,7 +127,10 @@
       "name": "CRM - Log Go-Live Activity",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 180]
+      "position": [
+        900,
+        180
+      ]
     },
     {
       "parameters": {
@@ -111,7 +141,10 @@
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [460, 420]
+      "position": [
+        460,
+        420
+      ]
     },
     {
       "parameters": {
@@ -120,7 +153,9 @@
             {
               "triggerAtHour": 9,
               "triggerAtMinute": 0,
-              "triggerAtDay": [1]
+              "triggerAtDay": [
+                1
+              ]
             }
           ]
         }
@@ -129,7 +164,10 @@
       "name": "Cron - Every Monday 9AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [240, 600]
+      "position": [
+        240,
+        600
+      ]
     },
     {
       "parameters": {
@@ -138,7 +176,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-n8n-secret", "value": "revenuecssecret" }
+            {
+              "name": "x-n8n-secret",
+              "value": "revenuecssecret"
+            }
           ]
         },
         "options": {}
@@ -147,7 +188,10 @@
       "name": "CRM - Fetch Live Clients",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [460, 600]
+      "position": [
+        460,
+        600
+      ]
     },
     {
       "parameters": {
@@ -159,7 +203,10 @@
       "name": "Split - Each Client",
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
-      "position": [680, 600]
+      "position": [
+        680,
+        600
+      ]
     },
     {
       "parameters": {
@@ -176,26 +223,32 @@
       "name": "IF - Has ROI Dashboard URL",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [900, 600]
+      "position": [
+        900,
+        600
+      ]
     },
     {
       "parameters": {
         "fromEmail": "michael@revenuecs.com",
         "toEmail": "={{ $json.email }}",
-        "subject": "This week's numbers are in — {{ $json.businessName }}",
+        "subject": "This week's numbers are in \u2014 {{ $json.businessName }}",
         "emailFormat": "html",
-        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#a5b4fc;text-transform:uppercase;\">RevenueCS — Weekly Report</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">Your numbers for the week.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.businessName }} team — your weekly performance data is ready. See exactly how many calls went out, how many bookings came in, and what the system generated this week.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:28px;\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.roiDashboardUrl }}\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;\">View This Week's Report →</a>\n  </td></tr></table>\n  <p style=\"margin:0 0 8px;font-size:13px;color:#6b7280;line-height:1.6;\">Numbers off? Reply to this email and we'll take a look. We review every week and optimize based on what the data shows.</p>\n  <p style=\"margin:0;font-size:13px;color:#6b7280;\">— The RevenueCS team</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael — RevenueCS &nbsp;·&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:40px 20px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);\">\n<tr><td style=\"background:#0f0f0f;padding:32px 40px;\">\n  <p style=\"margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#a5b4fc;text-transform:uppercase;\">RevenueCS \u2014 Weekly Report</p>\n  <h1 style=\"margin:8px 0 0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;\">This week's numbers are in.</h1>\n</td></tr>\n<tr><td style=\"padding:36px 40px;\">\n  <p style=\"margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;\">Hey {{ $json.businessName }} team,</p>\n  <p style=\"margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;\">Your weekly performance summary is ready. Below you'll find this week's call volume, connect rate, appointments booked, and the total estimated revenue your system generated \u2014 all broken down so you can see exactly where the numbers are coming from.</p>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:32px;\"><tr><td style=\"background:#6366f1;border-radius:8px;\">\n    <a href=\"{{ $json.roiDashboardUrl }}\" style=\"display:inline-block;padding:14px 32px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;\">View This Week's Full Report &#8594;</a>\n  </td></tr></table>\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9fafb;border-radius:8px;width:100%;margin-bottom:28px;\">\n    <tr><td style=\"padding:20px 24px;\">\n      <p style=\"margin:0 0 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">What's in your report</p>\n      <p style=\"margin:0 0 6px;font-size:14px;color:#111827;\">\u2022 <strong>Total calls made</strong> this week vs. last week</p>\n      <p style=\"margin:0 0 6px;font-size:14px;color:#111827;\">\u2022 <strong>Connect rate</strong> \u2014 how often the system reached a live person</p>\n      <p style=\"margin:0 0 6px;font-size:14px;color:#111827;\">\u2022 <strong>Appointments booked</strong> \u2014 the number that matters most</p>\n      <p style=\"margin:0;font-size:14px;color:#111827;\">\u2022 <strong>Estimated revenue generated</strong> based on your average deal value</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0 0 16px;font-size:14px;color:#374151;line-height:1.6;\">We review these numbers every single week on our end too. If we see anything off \u2014 a dip in connect rate, lower book rate, higher no-shows \u2014 we make adjustments without you having to ask. That's the job.</p>\n  <p style=\"margin:0 0 16px;font-size:14px;color:#374151;line-height:1.6;\">Something look wrong or confusing in the data? Reply to this email and I'll get back to you same day.</p>\n  <p style=\"margin:0;font-size:14px;color:#374151;\">\u2014 Michael</p>\n</td></tr>\n<tr><td style=\"background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;\">\n  <p style=\"margin:0;font-size:13px;color:#9ca3af;\">Michael \u2014 RevenueCS &nbsp;&#183;&nbsp; michael@revenuecs.com</p>\n</td></tr>\n</table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "email-roi-report",
       "name": "Email - Weekly ROI Report",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [1120, 540],
+      "position": [
+        1120,
+        540
+      ],
       "credentials": {
         "smtp": {
-          "id": "smtp-cred",
-          "name": "SMTP"
+          "id": "LViY7g19KwnPtnEG",
+          "name": "SMTP account 2"
         }
       }
     },
@@ -206,8 +259,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-n8n-secret", "value": "revenuecssecret" },
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "x-n8n-secret",
+              "value": "revenuecssecret"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -225,40 +284,113 @@
       "name": "CRM - Log ROI Report Activity",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1340, 540]
+      "position": [
+        1340,
+        540
+      ]
     }
   ],
   "connections": {
     "Webhook - Client Live": {
-      "main": [[{ "node": "Filter - client.live only", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Filter - client.live only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Filter - client.live only": {
       "main": [
         [
-          { "node": "Email - Go-Live to Client", "type": "main", "index": 0 },
-          { "node": "Email - Go-Live Internal", "type": "main", "index": 0 },
-          { "node": "Respond OK", "type": "main", "index": 0 }
+          {
+            "node": "Email - Go-Live to Client",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Go-Live Internal",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Email - Go-Live to Client": {
-      "main": [[{ "node": "CRM - Log Go-Live Activity", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "CRM - Log Go-Live Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cron - Every Monday 9AM": {
-      "main": [[{ "node": "CRM - Fetch Live Clients", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "CRM - Fetch Live Clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "CRM - Fetch Live Clients": {
-      "main": [[{ "node": "Split - Each Client", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Split - Each Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Split - Each Client": {
-      "main": [[{ "node": "IF - Has ROI Dashboard URL", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "IF - Has ROI Dashboard URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "IF - Has ROI Dashboard URL": {
-      "main": [[{ "node": "Email - Weekly ROI Report", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email - Weekly ROI Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Email - Weekly ROI Report": {
-      "main": [[{ "node": "CRM - Log ROI Report Activity", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "CRM - Log ROI Report Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": {
+    "executionOrder": "v1"
+  }
 }

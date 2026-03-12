@@ -56,10 +56,16 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const res = await fetch("/api/clients");
-    if (res.ok) setClients(await res.json());
+    try {
+      const res = await fetch("/api/clients");
+      if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
+      setClients(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    }
   }
 
   const filtered = clients.filter((c) => c.businessName.toLowerCase().includes(search.toLowerCase()));
@@ -68,6 +74,11 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
 
   return (
     <div className="animate-fade-up">
+      {error && (
+        <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#fca5a5" }}>
+          {error}
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Clients</h1>

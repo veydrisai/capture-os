@@ -8,6 +8,8 @@ interface WorkspaceSettings {
   makeWebhookUrl: string | null;
   agreementTemplateUrl: string | null;
   intakeFormUrl: string | null;
+  n8nWebhookUrl: string | null;
+  internalEmail: string | null;
 }
 
 export default function SettingsPage() {
@@ -18,9 +20,12 @@ export default function SettingsPage() {
     makeWebhookUrl: "",
     agreementTemplateUrl: "",
     intakeFormUrl: "",
+    n8nWebhookUrl: "",
+    internalEmail: "",
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/workspace-settings")
@@ -31,6 +36,8 @@ export default function SettingsPage() {
           makeWebhookUrl: data.makeWebhookUrl ?? "",
           agreementTemplateUrl: data.agreementTemplateUrl ?? "",
           intakeFormUrl: data.intakeFormUrl ?? "",
+          n8nWebhookUrl: data.n8nWebhookUrl ?? "",
+          internalEmail: data.internalEmail ?? "",
         });
       })
       .catch(() => {});
@@ -40,14 +47,21 @@ export default function SettingsPage() {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
-    await fetch("/api/workspace-settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(ws),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/workspace-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ws),
+      });
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -87,6 +101,20 @@ export default function SettingsPage() {
           <h2 style={{ fontSize: 14, fontWeight: 600, color: "white", marginBottom: 20 }}>Workspace</h2>
           <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <SettingField
+              label="Internal Notification Email"
+              hint="Your team email — receives alerts when deals move stages, agreements are sent, clients go live, etc."
+              value={ws.internalEmail ?? ""}
+              onChange={(v) => setWs((s) => ({ ...s, internalEmail: v }))}
+              placeholder="team@youragency.com"
+            />
+            <SettingField
+              label="n8n Webhook URL"
+              hint="Your n8n instance webhook URL — powers all automated emails and CRM updates"
+              value={ws.n8nWebhookUrl ?? ""}
+              onChange={(v) => setWs((s) => ({ ...s, n8nWebhookUrl: v }))}
+              placeholder="https://n8n.yourdomain.com/webhook"
+            />
+            <SettingField
               label="Make.com Webhook URL"
               hint="Fires when a deal reaches agreement_signed or onboarding_status → live"
               value={ws.makeWebhookUrl ?? ""}
@@ -117,6 +145,9 @@ export default function SettingsPage() {
               </button>
               {saved && (
                 <span style={{ fontSize: 12, color: "#86efac" }}>Saved ✓</span>
+              )}
+              {saveError && (
+                <span style={{ fontSize: 12, color: "#fca5a5" }}>{saveError}</span>
               )}
             </div>
           </form>

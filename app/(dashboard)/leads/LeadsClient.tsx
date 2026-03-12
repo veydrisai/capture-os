@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, List, Columns, Upload } from "lucide-react";
 import LeadModal from "@/components/crm/LeadModal";
 import LeadImportModal from "@/components/crm/LeadImportModal";
@@ -58,10 +58,16 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const res = await fetch("/api/leads");
-    if (res.ok) setLeads(await res.json());
+    try {
+      const res = await fetch("/api/leads");
+      if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
+      setLeads(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    }
   }
 
   const filtered = leads.filter((l) => {
@@ -80,6 +86,12 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
   );
 
   return (
+    <>
+      {error && (
+        <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#fca5a5" }}>
+          {error}
+        </div>
+      )}
     <PageShell
       title="Leads"
       subtitle={`${leads.length} total leads`}
@@ -211,5 +223,6 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
       {modalOpen && <LeadModal lead={editing} onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); load(); }} />}
       {importOpen && <LeadImportModal onClose={() => setImportOpen(false)} onImported={load} />}
     </PageShell>
+    </>
   );
 }
