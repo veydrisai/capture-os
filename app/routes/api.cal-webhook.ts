@@ -62,7 +62,7 @@ export async function action({ request }: { request: Request }) {
 
   // Send internal alert email via Resend
   const resendKey = process.env.RESEND_API_KEY;
-  const alertTo = process.env.INTERNAL_ALERT_EMAIL ?? "michael@revenuecs.app";
+  const alertTo = process.env.INTERNAL_ALERT_EMAIL ?? "michael@revenuecs.com";
 
   if (resendKey) {
     try {
