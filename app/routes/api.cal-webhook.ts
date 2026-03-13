@@ -73,7 +73,7 @@ export async function action({ request }: { request: Request }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Michael <michael@revenuecs.app>",
+          from: "Michael <michael@revenuecs.com>",
           to: [alertTo],
         subject: `🔥 New discovery call booked — ${firstName} ${lastName}`,
           html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
