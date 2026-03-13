@@ -75,7 +75,7 @@ export async function action({ request }: { request: Request }) {
         body: JSON.stringify({
           from: "CaptureOS <noreply@captureos.app>",
           to: [alertTo],
-        subject: `🔥 New discovery call booked — ${firstName} ${lastName}`,
+        subject: `New discovery call booked — ${firstName} ${lastName}`,
           html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
@@ -96,7 +96,7 @@ export async function action({ request }: { request: Request }) {
   </table>
   <table cellpadding="0" cellspacing="0" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;width:100%;margin-bottom:24px;">
     <tr><td style="padding:14px 20px;">
-      <p style="margin:0;font-size:13px;font-weight:700;color:#92400e;">⚡ They booked a call — confirm in Cal.com and prep for the demo.</p>
+      <p style="margin:0;font-size:13px;font-weight:700;color:#92400e;">They booked a call — confirm in Cal.com and prep for the demo.</p>
     </td></tr>
   </table>
   <p style="margin:0;font-size:13px;color:#6b7280;">Lead auto-created in CaptureOS. Source: cal.com | Lead ID: ${row.id}</p>
