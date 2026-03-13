@@ -62,7 +62,7 @@ export async function action({ request }: { request: Request }) {
 
   // Send internal alert email via Resend
   const resendKey = process.env.RESEND_API_KEY;
-  const alertTo = process.env.INTERNAL_ALERT_EMAIL ?? "michael@revenuecs.com";
+  const alertTo = process.env.INTERNAL_ALERT_EMAIL ?? "michael@revenuecs.app";
 
   if (resendKey) {
     try {
@@ -73,7 +73,7 @@ export async function action({ request }: { request: Request }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Michael <michael@revenuecs.com>",
+          from: "Michael <michael@revenuecs.app>",
           to: [alertTo],
         subject: `🔥 New discovery call booked — ${firstName} ${lastName}`,
           html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
