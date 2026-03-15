@@ -1,4 +1,3 @@
-"use client";
 
 import { useState } from "react";
 import { Plus, FileText, Phone, Mail, Users, CheckSquare } from "lucide-react";

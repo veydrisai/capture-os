@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Plus, Search, Columns, List } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";

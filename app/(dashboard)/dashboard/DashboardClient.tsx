@@ -63,7 +63,7 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 24 }}>
+      <div className="grid-kpi">
         {kpis.map(({ label, sublabel, value, icon: Icon, color, glow, bg }) => (
           <div key={label} className="glass" style={{ padding: "20px 20px 18px" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
@@ -90,11 +90,11 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-2col">
         <div className="glass" style={{ padding: 22 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h2 style={{ fontSize: 13.5, fontWeight: 600, color: "white" }}>Active Pipeline</h2>
-            <Link href="/deals" prefetch style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(99,102,241,0.85)", textDecoration: "none", fontWeight: 500 }}>
+            <Link to="/deals" prefetch="intent" style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(99,102,241,0.85)", textDecoration: "none", fontWeight: 500 }}>
               View all <ArrowUpRight size={11} />
             </Link>
           </div>
@@ -103,7 +103,7 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
               {stats.recentDeals.map((deal) => (
-                <Link key={deal.id} href="/deals" prefetch style={{ textDecoration: "none" }}>
+                <Link key={deal.id} to="/deals" prefetch="intent" style={{ textDecoration: "none" }}>
                   <div className="row-hover" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ fontSize: 13, fontWeight: 500, color: "white", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{deal.title}</p>
@@ -127,7 +127,7 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
         <div className="glass" style={{ padding: 22 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h2 style={{ fontSize: 13.5, fontWeight: 600, color: "white" }}>Recent Activity</h2>
-            <Link href="/activity" prefetch style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(99,102,241,0.85)", textDecoration: "none", fontWeight: 500 }}>
+            <Link to="/activity" prefetch="intent" style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(99,102,241,0.85)", textDecoration: "none", fontWeight: 500 }}>
               View all <ArrowUpRight size={11} />
             </Link>
           </div>

@@ -516,3 +516,164 @@ main {
 .bg-scene::before, .bg-scene::after, .bg-orb-3, .bg-orb-4 {
   will-change: transform;
 }
+
+/* ─── Responsive Layout ──────────────────────────────────────────────────── */
+
+.app-main {
+  margin-left: 224px;
+  min-height: 100vh;
+  padding: 28px 24px;
+  width: calc(100vw - 224px);
+  overflow-x: hidden;
+}
+
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 20px;
+  margin-left: -24px;
+  margin-right: -24px;
+  background: rgba(7, 7, 15, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.sidebar-close-btn {
+  display: none !important;
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 49;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.sidebar-backdrop.is-open {
+  display: block;
+}
+
+/* Sidebar slide transition — always present so it animates in/out */
+.glass-sidebar {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s ease;
+}
+
+/* ─── Responsive Grids ───────────────────────────────────────────────────── */
+
+.grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* ─── Reduce Motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-scene::before, .bg-scene::after, .bg-orb-3, .bg-orb-4 {
+    animation: none;
+  }
+  .animate-fade-up, .animate-scale-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .glass-sidebar {
+    transition: none;
+  }
+}
+
+/* ─── Tablet (769px – 1024px) ────────────────────────────────────────────── */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-kpi {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ─── Mobile (≤768px) ────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .app-main {
+    margin-left: 0;
+    width: 100%;
+    padding: 0 16px 32px;
+  }
+
+  .mobile-topbar {
+    display: flex;
+  }
+
+  .sidebar-close-btn {
+    display: flex !important;
+  }
+
+  /* Sidebar slides in from left on mobile */
+  .glass-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .glass-sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 48px rgba(0, 0, 0, 0.65);
+  }
+
+  .modal-overlay {
+    padding-left: 20px;
+  }
+
+  .grid-kpi {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .grid-2col {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Reduce blur intensity on mobile for GPU performance */
+  .glass {
+    backdrop-filter: blur(6px) saturate(130%);
+    -webkit-backdrop-filter: blur(6px) saturate(130%);
+  }
+
+  .glass-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .glass-strong {
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+  }
+
+  .modal-overlay {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* Slow down orb animations on mobile to reduce CPU */
+  .bg-scene::before { animation-duration: 120s; }
+  .bg-scene::after  { animation-duration: 150s; }
+  .bg-orb-3         { animation-duration: 100s; }
+  .bg-orb-4         { animation-duration: 130s; }
+}

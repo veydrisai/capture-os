@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef } from "react";
 import { Plus, Search, List, Columns, Upload } from "lucide-react";
 import {

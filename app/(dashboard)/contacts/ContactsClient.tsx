@@ -1,4 +1,3 @@
-"use client";
 
 import { useState } from "react";
 import { Plus, Search, Mail, Phone, MoreHorizontal, User } from "lucide-react";

@@ -2,7 +2,7 @@ import { NavLink } from "react-router";
 import {
   LayoutDashboard, Users, Zap, TrendingUp,
   Calendar, Activity, Settings, LogOut,
-  Building2, BookOpen,
+  Building2, BookOpen, X,
 } from "lucide-react";
 import { initials } from "@/lib/utils";
 
@@ -19,14 +19,26 @@ const navItems = [
 
 interface SidebarProps {
   user: { name?: string | null; email?: string | null; image?: string | null };
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ user }: SidebarProps) {
+export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps) {
   return (
     <aside
-      className="glass-sidebar"
+      className={`glass-sidebar${isOpen ? " sidebar-open" : ""}`}
       style={{ width: 224, position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 50, display: "flex", flexDirection: "column", padding: "20px 10px" }}
     >
+      {/* Mobile close button */}
+      <button
+        onClick={onClose}
+        className="sidebar-close-btn"
+        aria-label="Close navigation"
+        style={{ position: "absolute", top: 14, right: 10, background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: 6, borderRadius: 8, alignItems: "center", justifyContent: "center" }}
+      >
+        <X size={16} />
+      </button>
+
       <div style={{ padding: "6px 10px 28px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg,#6366f1,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(99,102,241,0.45),inset 0 1px 0 rgba(255,255,255,0.2)" }}>
@@ -52,6 +64,7 @@ export default function Sidebar({ user }: SidebarProps) {
             to={href}
             prefetch="intent"
             end={href === "/dashboard"}
+            onClick={onClose}
             style={({ isActive }) => ({
               display: "flex", alignItems: "center", gap: 9,
               padding: "9px 12px", borderRadius: 11,
@@ -63,6 +76,7 @@ export default function Sidebar({ user }: SidebarProps) {
               transition: "background 0.12s ease, color 0.12s ease",
               boxShadow: isActive ? "inset 0 1px 0 rgba(255,255,255,0.1),0 2px 8px rgba(99,102,241,0.15)" : "none",
             })}
+            className="nav-link"
           >
             {({ isActive }) => (
               <>
@@ -81,6 +95,8 @@ export default function Sidebar({ user }: SidebarProps) {
         <NavLink
           to="/settings"
           prefetch="intent"
+          onClick={onClose}
+          className="nav-link"
           style={({ isActive }) => ({
             display: "flex", alignItems: "center", gap: 9, padding: "8px 12px", borderRadius: 10,
             fontSize: 13, color: isActive ? "white" : "rgba(255,255,255,0.35)", textDecoration: "none",
@@ -105,13 +121,13 @@ export default function Sidebar({ user }: SidebarProps) {
             </p>
             <p style={{ fontSize: 10, color: "rgba(99,102,241,0.8)", fontWeight: 500 }}>Admin</p>
           </div>
-          <button
-            onClick={() => { window.location.href = "/auth/logout"; }}
+          <a
+            href="/auth/logout"
             title="Sign out"
-            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.25)", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center" }}
+            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.25)", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", textDecoration: "none" }}
           >
             <LogOut size={13} />
-          </button>
+          </a>
         </div>
       </div>
     </aside>
