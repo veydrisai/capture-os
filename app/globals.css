@@ -507,14 +507,74 @@ body {
   color: white;
 }
 
-/* Smooth page transitions */
-main {
-  animation: fadeIn 0.12s ease forwards;
+/* Page content fade-in on initial load only — not on every navigation */
+main > .outlet-wrap > .animate-fade-up:first-child {
+  animation: fadeUp 0.15s ease-out forwards;
 }
 
 /* GPU-accelerate only the continuously animated orbs */
 .bg-scene::before, .bg-scene::after, .bg-orb-3, .bg-orb-4 {
   will-change: transform;
+}
+
+/* ─── Navigation Progress Bar ───────────────────────────────────────────── */
+
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.nav-progress.active {
+  opacity: 1;
+}
+
+.nav-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+  background-size: 200% 100%;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+  animation: nav-progress-run 1.2s ease-in-out forwards,
+             nav-progress-shimmer 1.2s linear infinite;
+}
+
+@keyframes nav-progress-run {
+  0%   { width: 0%; }
+  30%  { width: 55%; }
+  60%  { width: 75%; }
+  100% { width: 90%; }
+}
+
+@keyframes nav-progress-shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: -200% center; }
+}
+
+.nav-progress.done .nav-progress-bar {
+  width: 100% !important;
+  animation: nav-progress-finish 0.2s ease-out forwards;
+}
+
+@keyframes nav-progress-finish {
+  0%   { width: 90%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+
+/* Outlet dims while navigating */
+.outlet-wrap {
+  transition: opacity 0.15s ease;
+}
+
+.outlet-wrap.loading {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* ─── Responsive Layout ──────────────────────────────────────────────────── */

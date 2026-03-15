@@ -1,5 +1,5 @@
-import { Outlet, redirect } from "react-router";
-import { useState } from "react";
+import { Outlet, redirect, useNavigation } from "react-router";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import { getSession } from "@/app/sessions.server";
 
@@ -19,10 +19,37 @@ export async function loader({ request }: { request: Request }) {
 export default function DashboardLayout({ loaderData }: { loaderData: Awaited<ReturnType<typeof loader>> }) {
   const data = loaderData as { user: { name: string | null; email: string | null; image: string | null } };
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
+
+  // Progress bar: "idle" | "active" | "done"
+  const [progressState, setProgressState] = useState<"idle" | "active" | "done">("idle");
+  const doneTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (doneTimer.current) clearTimeout(doneTimer.current);
+
+    if (isLoading) {
+      setProgressState("active");
+    } else if (progressState === "active") {
+      // Flash to "done" briefly so the bar completes before hiding
+      setProgressState("done");
+      doneTimer.current = setTimeout(() => setProgressState("idle"), 300);
+    }
+
+    return () => {
+      if (doneTimer.current) clearTimeout(doneTimer.current);
+    };
+  }, [isLoading]);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Mobile backdrop — tap to close sidebar */}
+      {/* Navigation progress bar */}
+      <div className={`nav-progress${progressState !== "idle" ? ` ${progressState}` : ""}`}>
+        {progressState !== "idle" && <div className="nav-progress-bar" key={String(isLoading)} />}
+      </div>
+
+      {/* Mobile backdrop */}
       <div
         className={`sidebar-backdrop${sidebarOpen ? " is-open" : ""}`}
         onClick={() => setSidebarOpen(false)}
@@ -35,7 +62,7 @@ export default function DashboardLayout({ loaderData }: { loaderData: Awaited<Re
       />
 
       <main className="app-main">
-        {/* Mobile top bar — only visible on ≤768px via CSS */}
+        {/* Mobile top bar */}
         <div className="mobile-topbar">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -56,11 +83,12 @@ export default function DashboardLayout({ loaderData }: { loaderData: Awaited<Re
             </div>
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "white" }}>CaptureOS</span>
           </div>
-          {/* Spacer to center logo */}
           <div style={{ width: 32 }} />
         </div>
 
-        <Outlet />
+        <div className={`outlet-wrap${isLoading ? " loading" : ""}`}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );
