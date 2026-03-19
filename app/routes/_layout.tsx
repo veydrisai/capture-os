@@ -76,11 +76,7 @@ export default function DashboardLayout({ loaderData }: { loaderData: Awaited<Re
             </svg>
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#6366f1,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(99,102,241,0.4)" }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                <path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z" fill="white" />
-              </svg>
-            </div>
+            <img src="/logo.svg" alt="CaptureOS" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2, boxShadow: "0 2px 10px rgba(168,255,71,0.25)" }} />
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "white" }}>CaptureOS</span>
           </div>
           <div style={{ width: 32 }} />

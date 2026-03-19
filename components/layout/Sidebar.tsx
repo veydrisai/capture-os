@@ -41,14 +41,10 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
 
       <div style={{ padding: "6px 10px 28px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg,#6366f1,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(99,102,241,0.45),inset 0 1px 0 rgba(255,255,255,0.2)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z" fill="white" />
-            </svg>
-          </div>
+          <img src="/logo.svg" alt="CaptureOS" style={{ width: 34, height: 34, borderRadius: 10, objectFit: "contain", background: "#fff", padding: 3, flexShrink: 0, boxShadow: "0 4px 14px rgba(168,255,71,0.25)" }} />
           <div>
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "white", display: "block" }}>CaptureOS</span>
-            <span style={{ fontSize: 10, color: "rgba(99,102,241,0.7)", fontWeight: 500, letterSpacing: "0.03em" }}>RevenueCaptureSystem</span>
+            <span style={{ fontSize: 10, color: "rgba(168,255,71,0.5)", fontWeight: 500, letterSpacing: "0.03em" }}>revcapturesystem.com</span>
           </div>
         </div>
       </div>

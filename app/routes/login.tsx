@@ -8,11 +8,7 @@ export default function LoginPage() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: 18, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 8px 32px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.25)", marginBottom: 20 }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z" fill="white" />
-            </svg>
-          </div>
+          <img src="/logo.svg" alt="CaptureOS" style={{ width: 56, height: 56, borderRadius: 18, objectFit: "contain", background: "#fff", padding: 6, marginBottom: 20, boxShadow: "0 8px 32px rgba(168,255,71,0.3)" }} />
           <h1 style={{ fontSize: 28, fontWeight: 700, color: "white", letterSpacing: "-0.04em", marginBottom: 8 }}>CaptureOS</h1>
           <p style={{ color: "rgba(255,255,255,0.38)", fontSize: 14 }}>Your team&apos;s command center</p>
         </div>
