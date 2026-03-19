@@ -1,7 +1,7 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 
 export default defineConfig({
-  // Replace with your project ref from trigger.dev dashboard (Project Settings → API Keys)
-  project: (process.env.TRIGGER_PROJECT_REF ?? "proj_placeholder") as string,
+  project: (process.env.TRIGGER_PROJECT_REF ?? "proj_faunavpdzjxftdrqtzlm") as string,
   dirs: ["./trigger"],
+  maxDuration: 300, // 5 minutes max per task run
 } as Parameters<typeof defineConfig>[0]);
