@@ -6,9 +6,9 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
-      <div style={{ width: "100%", maxWidth: 380 }}>
+      <div style={{ width: "100%", maxWidth: 380, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <img src="/logo.svg" alt="CaptureOS" style={{ width: 56, height: 56, borderRadius: 18, objectFit: "contain", marginBottom: 20, boxShadow: "0 8px 32px rgba(168,255,71,0.3)" }} />
+          <img src="/logo.svg" alt="CaptureOS" style={{ display: "block", margin: "0 auto 20px", width: 56, height: 56, borderRadius: 18, objectFit: "contain", boxShadow: "0 8px 32px rgba(168,255,71,0.3)" }} />
           <h1 style={{ fontSize: 28, fontWeight: 700, color: "white", letterSpacing: "-0.04em", marginBottom: 8 }}>CaptureOS</h1>
           <p style={{ color: "rgba(255,255,255,0.38)", fontSize: 14 }}>Your team&apos;s command center</p>
         </div>
