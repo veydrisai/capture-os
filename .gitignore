@@ -26,3 +26,7 @@ app/sessions.server.js
 .trigger/active-runs.json
 .trigger/dev.lock
 .trigger/watchdog.pid
+tests/e2e/.auth/
+artifacts/
+playwright-report/
+test-results/
