@@ -57,8 +57,13 @@ export default function LeadModal({ lead, onClose, onSaved }: Props) {
 
   async function handleDelete() {
     if (!lead || !confirm("Delete this lead?")) return;
-    await fetch(`/api/leads/${lead.id}`, { method: "DELETE" });
-    onSaved();
+    try {
+      const res = await fetch(`/api/leads/${lead.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
   }
 
   const modal = (

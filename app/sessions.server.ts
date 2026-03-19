@@ -7,7 +7,7 @@ export const sessionStorage = createCookieSessionStorage({
     maxAge: 60 * 60 * 24 * 30,
     path: "/",
     sameSite: "lax",
-    secrets: [process.env.AUTH_SECRET ?? "changeme-set-AUTH_SECRET"],
+    secrets: [process.env.AUTH_SECRET ?? (() => { throw new Error("AUTH_SECRET env var is required") })()],
     secure: process.env.NODE_ENV === "production",
   },
 });

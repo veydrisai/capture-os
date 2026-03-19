@@ -14,16 +14,27 @@ export async function loader({ request }: { request: Request }) {
   });
 }
 
+function sanitizeUrl(val: unknown): string | null {
+  if (!val || typeof val !== "string") return null;
+  try {
+    const u = new URL(val);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
 export async function action({ request }: { request: Request }) {
   const user = await requireUser(request);
   const body = await request.json();
   const [existing] = await db.select().from(workspaceSettings).limit(1);
 
   const values = {
-    makeWebhookUrl: body.makeWebhookUrl || null,
-    n8nWebhookUrl: body.n8nWebhookUrl || null,
-    agreementTemplateUrl: body.agreementTemplateUrl || null,
-    intakeFormUrl: body.intakeFormUrl || null,
+    makeWebhookUrl: sanitizeUrl(body.makeWebhookUrl),
+    n8nWebhookUrl: sanitizeUrl(body.n8nWebhookUrl),
+    agreementTemplateUrl: sanitizeUrl(body.agreementTemplateUrl),
+    intakeFormUrl: sanitizeUrl(body.intakeFormUrl),
     internalEmail: body.internalEmail || null,
     updatedBy: user.id,
     updatedAt: new Date(),

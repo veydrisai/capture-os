@@ -6,13 +6,17 @@ import { X, Check, Send } from "lucide-react";
 
 interface Client {
   id: string; businessName: string; email: string | null; systemType: string | null; onboardingStatus: string;
+  contactId: string | null; dealId: string | null;
   intakeFormSent: boolean; intakeFormComplete: boolean; complianceReviewed: boolean;
   complianceApproved: boolean; accountsChecklist: boolean; kickoffScheduled: boolean;
   kickoffDone: boolean; buildComplete: boolean; testingComplete: boolean; softLaunchDone: boolean;
-  goLiveDate: string | null; twilioAccountSid: string | null; vapiAssistantId: string | null;
+  goLiveDate: string | Date | null; twilioAccountSid: string | null; vapiAssistantId: string | null;
   makeWebhookUrl: string | null; roiDashboardUrl: string | null; monthlyRetainer: number;
-  nextBillingDate: string | null; complianceNotes: string | null; notes: string | null;
+  nextBillingDate: string | Date | null; complianceNotes: string | null; notes: string | null;
 }
+
+interface Contact { id: string; firstName: string; lastName: string; company: string | null; }
+interface Deal { id: string; title: string; stage: string; }
 
 interface Props { client: Client | null; onClose: () => void; onSaved: () => void; }
 
@@ -37,11 +41,12 @@ const CHECKLIST = [
   { key: "softLaunchDone", label: "Soft Launch Done" },
 ];
 
-function toDate(val: string | null | undefined) { return val ? String(val).split("T")[0] : ""; }
+function toDate(val: string | Date | null | undefined) { return val ? String(val).split("T")[0] : ""; }
 
 export default function ClientModal({ client, onClose, onSaved }: Props) {
   const [form, setForm] = useState({
     businessName: client?.businessName ?? "", email: client?.email ?? "", systemType: client?.systemType ?? "",
+    contactId: client?.contactId ?? "", dealId: client?.dealId ?? "",
     onboardingStatus: client?.onboardingStatus ?? "pending",
     monthlyRetainer: client?.monthlyRetainer?.toString() ?? "",
     goLiveDate: toDate(client?.goLiveDate), nextBillingDate: toDate(client?.nextBillingDate),
@@ -54,6 +59,8 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
     kickoffDone: client?.kickoffDone ?? false, buildComplete: client?.buildComplete ?? false,
     testingComplete: client?.testingComplete ?? false, softLaunchDone: client?.softLaunchDone ?? false,
   });
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
   const [saving, setSaving] = useState(false);
   const [sendingIntake, setSendingIntake] = useState(false);
   const [intakeSent, setIntakeSent] = useState(false);
@@ -62,6 +69,13 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    Promise.all([
+      fetch("/api/contacts?limit=200").then((r) => r.ok ? r.json() : []),
+      fetch("/api/deals?limit=200").then((r) => r.ok ? r.json() : []),
+    ]).then(([c, d]: [Contact[], Deal[]]) => {
+      setContacts(c);
+      setDeals(d);
+    }).catch(() => {});
     return () => { document.body.style.overflow = ""; };
   }, []);
 
@@ -81,8 +95,13 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
 
   async function handleDelete() {
     if (!client || !confirm("Delete this client?")) return;
-    await fetch(`/api/clients/${client.id}`, { method: "DELETE" });
-    onSaved();
+    try {
+      const res = await fetch(`/api/clients/${client.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
   }
 
   async function handleSendIntake() {
@@ -119,6 +138,33 @@ export default function ClientModal({ client, onClose, onSaved }: Props) {
           {/* Scrollable body */}
           <div style={bodyStyle}>
             <Field label="Business Name" value={form.businessName} onChange={(v) => up("businessName", v)} required />
+
+            <div style={grid2}>
+              <div>
+                <label style={labelStyle}>Linked Contact</label>
+                <select value={form.contactId} onChange={(e) => up("contactId", e.target.value)} style={selectStyle}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+                >
+                  <option value="">— None —</option>
+                  {contacts.map((c) => (
+                    <option key={c.id} value={c.id}>{c.firstName} {c.lastName}{c.company ? ` · ${c.company}` : ""}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Linked Deal</label>
+                <select value={form.dealId} onChange={(e) => up("dealId", e.target.value)} style={selectStyle}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+                >
+                  <option value="">— None —</option>
+                  {deals.map((d) => (
+                    <option key={d.id} value={d.id}>{d.title} · {d.stage.replace(/_/g, " ")}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
               <div style={{ flex: 1 }}>

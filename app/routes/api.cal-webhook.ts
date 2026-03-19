@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { leads } from "@/drizzle/schema";
 import { processInboundLead } from "@/trigger/lead-inbound";
+import { escHtml } from "@/lib/html";
 
 /**
  * Cal.com webhook endpoint — receives BOOKING_CREATED events directly.
@@ -12,9 +13,13 @@ export async function action({ request }: { request: Request }) {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
-  // Validate Cal.com webhook secret
+  // Validate Cal.com webhook secret — required; missing env var = hard fail
   const calSecret = process.env.CAL_WEBHOOK_SECRET;
-  if (calSecret) {
+  if (!calSecret) {
+    console.error("[cal-webhook] CAL_WEBHOOK_SECRET env var not set — rejecting request");
+    return Response.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+  {
     const signature = request.headers.get("x-cal-signature-256");
     if (!signature) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,7 +38,7 @@ export async function action({ request }: { request: Request }) {
     if (signature !== expected) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-  }
+  } // end secret validation block
 
   let body: unknown;
   try {
@@ -99,23 +104,23 @@ export async function action({ request }: { request: Request }) {
         body: JSON.stringify({
           from: "CaptureOS <noreply@captureos.app>",
           to: [alertTo],
-        subject: `New discovery call booked — ${firstName} ${lastName}`,
+        subject: `New discovery call booked — ${escHtml(firstName)} ${escHtml(lastName)}`,
           html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
 <tr><td style="background:#0f0f0f;padding:28px 40px;">
   <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#fbbf24;text-transform:uppercase;">New Discovery Call Booked</p>
-  <h1 style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;">${firstName} ${lastName}</h1>
+  <h1 style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;">${escHtml(firstName)} ${escHtml(lastName)}</h1>
 </td></tr>
 <tr><td style="padding:32px 40px;">
   <table cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:8px;width:100%;margin-bottom:24px;">
     <tr><td style="padding:20px 24px;">
       <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;">Lead details</p>
-      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Email:</strong> ${email}</p>
-      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Phone:</strong> ${phone || "Not provided"}</p>
-      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Company:</strong> ${company || "Not provided"}</p>
-      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Interested in:</strong> ${systemInterest}</p>
-      <p style="margin:0;font-size:14px;color:#111827;"><strong>Booking:</strong> ${notes}</p>
+      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Email:</strong> ${escHtml(email)}</p>
+      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Phone:</strong> ${escHtml(phone) || "Not provided"}</p>
+      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Company:</strong> ${escHtml(company) || "Not provided"}</p>
+      <p style="margin:0 0 4px;font-size:14px;color:#111827;"><strong>Interested in:</strong> ${escHtml(systemInterest)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;"><strong>Booking:</strong> ${escHtml(notes)}</p>
     </td></tr>
   </table>
   <table cellpadding="0" cellspacing="0" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;width:100%;margin-bottom:24px;">

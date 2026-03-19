@@ -27,6 +27,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   const [row] = await db.insert(deals).values({
     title: body.title,
+    contactId: body.contactId || null,
     stage: body.stage ?? "cold_outreach",
     systemType: body.systemType || null,
     value: body.value ? parseInt(body.value) : 0,

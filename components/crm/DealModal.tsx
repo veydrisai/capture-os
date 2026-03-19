@@ -6,11 +6,14 @@ import { X, Zap } from "lucide-react";
 
 interface Deal {
   id: string; title: string; stage: string; systemType: string | null;
+  contactId: string | null;
   value: number; setupFee: number; monthlyRetainer: number; probability: number;
-  closeDate: string | null; agreementSentAt: string | null; agreementSignedAt: string | null;
-  paymentReceivedAt: string | null; demoBookedAt: string | null; demoDoneAt: string | null;
+  closeDate: string | Date | null; agreementSentAt: string | Date | null; agreementSignedAt: string | Date | null;
+  paymentReceivedAt: string | Date | null; demoBookedAt: string | Date | null; demoDoneAt: string | Date | null;
   lostReason: string | null; notes: string | null; webhookFired: boolean;
 }
+
+interface Contact { id: string; firstName: string; lastName: string; company: string | null; }
 
 interface Props { deal: Deal | null; onClose: () => void; onSaved: () => void; }
 
@@ -26,11 +29,12 @@ const SYSTEM_TYPES = [
   { key: "hot_lead", label: "Hot Lead" }, { key: "backend", label: "Backend" }, { key: "combo", label: "Combo" },
 ];
 
-function toDate(val: string | null | undefined) { return val ? String(val).split("T")[0] : ""; }
+function toDate(val: string | Date | null | undefined) { return val ? String(val).split("T")[0] : ""; }
 
 export default function DealModal({ deal, onClose, onSaved }: Props) {
   const [form, setForm] = useState({
     title: deal?.title ?? "", stage: deal?.stage ?? "cold_outreach",
+    contactId: deal?.contactId ?? "",
     systemType: deal?.systemType ?? "", value: deal?.value?.toString() ?? "",
     setupFee: deal?.setupFee?.toString() ?? "", monthlyRetainer: deal?.monthlyRetainer?.toString() ?? "",
     probability: deal?.probability?.toString() ?? "", closeDate: toDate(deal?.closeDate),
@@ -38,12 +42,17 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
     paymentReceivedAt: toDate(deal?.paymentReceivedAt), demoBookedAt: toDate(deal?.demoBookedAt),
     demoDoneAt: toDate(deal?.demoDoneAt), lostReason: deal?.lostReason ?? "", notes: deal?.notes ?? "",
   });
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const up = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    fetch("/api/contacts?limit=200")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Contact[]) => setContacts(data))
+      .catch(() => {});
     return () => { document.body.style.overflow = ""; };
   }, []);
 
@@ -63,8 +72,13 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
 
   async function handleDelete() {
     if (!deal || !confirm("Delete this deal?")) return;
-    await fetch(`/api/deals/${deal.id}`, { method: "DELETE" });
-    onSaved();
+    try {
+      const res = await fetch(`/api/deals/${deal.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
   }
 
   const modal = (
@@ -86,6 +100,18 @@ export default function DealModal({ deal, onClose, onSaved }: Props) {
           {/* Scrollable body */}
           <div style={bodyStyle}>
             <Field label="Deal / Company Name" value={form.title} onChange={(v) => up("title", v)} required />
+            <div>
+              <label style={labelStyle}>Linked Contact</label>
+              <select value={form.contactId} onChange={(e) => up("contactId", e.target.value)} style={selectStyle}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <option value="">— No contact linked —</option>
+                {contacts.map((c) => (
+                  <option key={c.id} value={c.id}>{c.firstName} {c.lastName}{c.company ? ` · ${c.company}` : ""}</option>
+                ))}
+              </select>
+            </div>
             <div style={grid2}>
               <SelectF label="Stage" value={form.stage} onChange={(v) => up("stage", v)} options={STAGE_OPTIONS} />
               <SelectF label="System Type" value={form.systemType} onChange={(v) => up("systemType", v)} options={SYSTEM_TYPES} />

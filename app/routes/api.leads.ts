@@ -15,20 +15,23 @@ export async function action({ request }: { request: Request }) {
 
   // Bulk import — body is an array
   if (Array.isArray(body)) {
+    if (body.length > 500) {
+      return Response.json({ error: "Bulk import limited to 500 rows per request" }, { status: 400 });
+    }
     const values = body
-      .filter((r: any) => r.firstName || r.email)
-      .map((r: any) => ({
-        firstName: r.firstName || "",
-        lastName: r.lastName || "",
-        email: r.email || null,
-        phone: r.phone || null,
-        company: r.company || null,
+      .filter((r: Record<string, unknown>) => r.firstName || r.email)
+      .map((r: Record<string, unknown>) => ({
+        firstName: String(r.firstName || ""),
+        lastName: String(r.lastName || ""),
+        email: r.email ? String(r.email) : null,
+        phone: r.phone ? String(r.phone) : null,
+        company: r.company ? String(r.company) : null,
         status: "new" as const,
-        source: r.source || "import",
-        industry: r.industry || null,
-        estimatedValue: r.estimatedValue ? parseInt(r.estimatedValue) : 0,
-        systemInterest: r.systemInterest || null,
-        notes: r.notes || null,
+        source: r.source ? String(r.source) : "import",
+        industry: r.industry ? String(r.industry) : null,
+        estimatedValue: r.estimatedValue ? Math.min(10_000_000, parseInt(String(r.estimatedValue), 10) || 0) : 0,
+        systemInterest: r.systemInterest ? String(r.systemInterest) : null,
+        notes: r.notes ? String(r.notes) : null,
         createdBy: user.id,
         assignedTo: user.id,
       }));

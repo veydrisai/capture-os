@@ -19,6 +19,7 @@ export async function action({ request }: { request: Request }) {
     contactId: body.contactId || null,
     leadId: body.leadId || null,
     dealId: body.dealId || null,
+    clientId: body.clientId || null,
     scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null,
     createdBy: user.id,
   }).returning();

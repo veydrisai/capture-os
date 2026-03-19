@@ -4,6 +4,8 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  MeasuringStrategy,
+  pointerWithin,
   useSensor,
   useSensors,
   useDroppable,
@@ -251,6 +253,8 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
         {view === "kanban" && (
           <DndContext
             sensors={sensors}
+            collisionDetection={pointerWithin}
+            measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             autoScroll={{
@@ -323,8 +327,8 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
 
         {/* ══ LIST VIEW ══ */}
         {view === "list" && (
-          <div className="glass" style={{ overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div className="glass" style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                   {["Name", "Company", "Status", "System", "Source", "Value", ""].map((h) => (

@@ -32,6 +32,9 @@ export async function POST(req: Request) {
   const body = await req.json();
   const [row] = await db.insert(clients).values({
     businessName: body.businessName,
+    contactId: body.contactId || null,
+    dealId: body.dealId || null,
+    email: body.email || null,
     systemType: body.systemType || null,
     onboardingStatus: body.onboardingStatus ?? "pending",
     monthlyRetainer: body.monthlyRetainer ? parseInt(body.monthlyRetainer) : 0,

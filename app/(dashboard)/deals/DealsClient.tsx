@@ -9,6 +9,7 @@ interface Deal {
   id: string;
   title: string;
   stage: string;
+  contactId: string | null;
   systemType: string | null;
   value: number;
   setupFee: number;
@@ -200,8 +201,8 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
 
       {/* ══ LIST VIEW ══ */}
       {view === "list" && (
-        <div className="glass" style={{ overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="glass" style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 680 }}>
             <thead>
               <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 {["Deal", "Stage", "System", "Setup", "MRR", "Value", "Prob"].map((h) => (

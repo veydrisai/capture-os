@@ -64,8 +64,13 @@ export default function ContactModal({ contact, onClose, onSaved }: Props) {
 
   async function handleDelete() {
     if (!contact || !confirm("Delete this contact?")) return;
-    await fetch(`/api/contacts/${contact.id}`, { method: "DELETE" });
-    onSaved();
+    try {
+      const res = await fetch(`/api/contacts/${contact.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
   }
 
   const modal = (

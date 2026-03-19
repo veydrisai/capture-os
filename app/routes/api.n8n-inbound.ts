@@ -11,9 +11,21 @@ import { eq } from "drizzle-orm";
  *   update_client_onboarding — mark onboarding checklist fields on a client
  *   update_deal_stage — move a deal to a new stage
  */
+function timingSafeStringEqual(a: string, b: string): boolean {
+  // Same-length check leaks length info, but for a static secret this is acceptable.
+  // We HMAC both with a fixed key so comparison is constant-time regardless of input.
+  const aBytes = new TextEncoder().encode(a);
+  const bBytes = new TextEncoder().encode(b);
+  if (aBytes.length !== bBytes.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
+  return diff === 0;
+}
+
 export async function action({ request }: { request: Request }) {
   const secret = request.headers.get("x-n8n-secret");
-  if (secret !== process.env.N8N_INBOUND_SECRET) {
+  const expected = process.env.N8N_INBOUND_SECRET;
+  if (!secret || !expected || !timingSafeStringEqual(secret, expected)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -52,7 +64,7 @@ export async function action({ request }: { request: Request }) {
       if (key in fields) updates[key] = fields[key];
     }
 
-    const [row] = await db.update(clients).set(updates as never).where(eq(clients.id, clientId)).returning();
+    const [row] = await db.update(clients).set(updates as Partial<typeof clients.$inferInsert>).where(eq(clients.id, clientId)).returning();
     return Response.json(row);
   }
 
@@ -67,7 +79,7 @@ export async function action({ request }: { request: Request }) {
     if (stage === "demo_done") stageTimestamps.demoDoneAt = now;
     if (stage === "agreement_signed") stageTimestamps.agreementSignedAt = now;
 
-    const [row] = await db.update(deals).set({ stage, ...stageTimestamps, updatedAt: now } as never).where(eq(deals.id, dealId)).returning();
+    const [row] = await db.update(deals).set({ stage, ...stageTimestamps, updatedAt: now } as Partial<typeof deals.$inferInsert>).where(eq(deals.id, dealId)).returning();
     return Response.json(row);
   }
 

@@ -1,0 +1,58 @@
+{
+  "configPath": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger.config.mjs",
+  "customConditions": [
+  ],
+  "queues": [
+  ],
+  "runtime": "node",
+  "runtimeVersion": "24.13.1",
+  "tasks": [
+    {
+      "entryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger/client-live.mjs",
+      "filePath": "trigger/client-live.ts",
+      "id": "client-go-live",
+      "maxDuration": 300
+    },
+    {
+      "entryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger/client-live.mjs",
+      "filePath": "trigger/client-live.ts",
+      "id": "weekly-roi-emails",
+      "maxDuration": 300,
+      "schedule": {
+        "cron": "0 15 * * 1",
+        "timezone": "UTC"
+      },
+      "triggerSource": "schedule"
+    },
+    {
+      "entryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger/deal-automation.mjs",
+      "filePath": "trigger/deal-automation.ts",
+      "id": "demo-done-agreement-sender",
+      "maxDuration": 300
+    },
+    {
+      "entryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger/deal-automation.mjs",
+      "filePath": "trigger/deal-automation.ts",
+      "id": "agreement-signed-onboarding",
+      "maxDuration": 300
+    },
+    {
+      "entryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger/deal-automation.mjs",
+      "filePath": "trigger/deal-automation.ts",
+      "id": "demo-booked-alert",
+      "maxDuration": 300
+    },
+    {
+      "entryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/Desktop/capture-os/trigger/lead-inbound.mjs",
+      "filePath": "trigger/lead-inbound.ts",
+      "id": "process-inbound-lead",
+      "maxDuration": 300
+    }
+  ],
+  "timings": {
+    "trigger/client-live.ts": 78.62333199999989,
+    "trigger/deal-automation.ts": 1.9489990000001853,
+    "trigger/lead-inbound.ts": 2.711140999999998
+  },
+  "workerEntryPoint": "/Users/raulparga/Desktop/capture-os/.trigger/tmp/build-o8ZcA1/.npm/_npx/f51a09bd0abf5f10/node_modules/trigger.dev/dist/esm/entryPoints/dev-run-worker.mjs"
+}

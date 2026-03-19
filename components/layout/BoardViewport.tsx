@@ -65,7 +65,6 @@ export default function BoardViewport({
     display: "flex",
     gap: GAP,
     overflowX: "auto",
-    overflowY: "hidden",
     paddingBottom: 24,
     paddingTop: 2,
     paddingRight: 48,
@@ -75,7 +74,7 @@ export default function BoardViewport({
   };
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+    <div ref={wrapperRef} style={{ position: "relative", width: "100%", overflow: "clip" }}>
       <div style={needsScroll ? flexStyle : gridStyle}>
         {/* Inject lane sizing via CSS custom props */}
         {React.Children.map(children, (child) => {

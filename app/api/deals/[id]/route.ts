@@ -32,6 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const now = new Date();
   const updates: Record<string, unknown> = {
     title: body.title,
+    contactId: body.contactId !== undefined ? (body.contactId || null) : existing?.contactId,
     stage: body.stage,
     systemType: body.systemType || null,
     value: body.value !== undefined ? parseInt(body.value) || 0 : existing?.value,

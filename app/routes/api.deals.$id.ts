@@ -1,8 +1,17 @@
 import { db } from "@/lib/db";
 import { deals, contacts, workspaceSettings } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import type { InferInsertModel } from "drizzle-orm";
 import { requireUser } from "@/app/sessions.server";
 import { demoDoneAgreementSender, agreementSignedOnboarding, demoBookedAlert } from "@/trigger/deal-automation";
+
+function clampInt(val: unknown, min = 0, max = 10_000_000): number {
+  const n = parseInt(String(val), 10);
+  if (isNaN(n)) return 0;
+  return Math.min(max, Math.max(min, n));
+}
+
+type DealUpdate = Partial<InferInsertModel<typeof deals>>;
 
 export async function action({ request, params }: { request: Request; params: { id: string } }) {
   await requireUser(request);
@@ -17,14 +26,14 @@ export async function action({ request, params }: { request: Request; params: { 
   const [existing] = await db.select().from(deals).where(eq(deals.id, id));
   const now = new Date();
 
-  const updates: Record<string, unknown> = {
+  const updates: DealUpdate = {
     title: body.title,
     stage: body.stage,
     systemType: body.systemType || null,
-    value: body.value !== undefined ? parseInt(body.value) || 0 : existing?.value,
-    setupFee: body.setupFee !== undefined ? parseInt(body.setupFee) || 0 : existing?.setupFee,
-    monthlyRetainer: body.monthlyRetainer !== undefined ? parseInt(body.monthlyRetainer) || 0 : existing?.monthlyRetainer,
-    probability: body.probability !== undefined ? parseInt(body.probability) || 0 : existing?.probability,
+    value: body.value !== undefined ? clampInt(body.value) : existing?.value ?? 0,
+    setupFee: body.setupFee !== undefined ? clampInt(body.setupFee) : existing?.setupFee ?? 0,
+    monthlyRetainer: body.monthlyRetainer !== undefined ? clampInt(body.monthlyRetainer) : existing?.monthlyRetainer ?? 0,
+    probability: body.probability !== undefined ? clampInt(body.probability, 0, 100) : existing?.probability ?? 0,
     closeDate: body.closeDate ? new Date(body.closeDate) : (body.closeDate === "" ? null : existing?.closeDate),
     notes: body.notes ?? existing?.notes,
     lostReason: body.lostReason || null,
@@ -43,8 +52,7 @@ export async function action({ request, params }: { request: Request; params: { 
   if (body.demoBookedAt !== undefined) updates.demoBookedAt = body.demoBookedAt ? new Date(body.demoBookedAt) : null;
   if (body.demoDoneAt !== undefined) updates.demoDoneAt = body.demoDoneAt ? new Date(body.demoDoneAt) : null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [row] = await db.update(deals).set(updates as any).where(eq(deals.id, id)).returning();
+  const [row] = await db.update(deals).set(updates).where(eq(deals.id, id)).returning();
 
   const stageChanged = body.stage && existing?.stage !== body.stage;
 
@@ -77,11 +85,12 @@ export async function action({ request, params }: { request: Request; params: { 
 
     // ── agreement_signed → kick off onboarding via Trigger.dev ───────────
     if (body.stage === "agreement_signed" && !existing?.webhookFired) {
+      // Mark flag FIRST to prevent double-fire if trigger call succeeds but flag update fails
+      await db.update(deals).set({ webhookFired: true }).where(eq(deals.id, id));
       await agreementSignedOnboarding.trigger({
         ...basePayload,
         agreementSignedAt: now.toISOString(),
       });
-      await db.update(deals).set({ webhookFired: true }).where(eq(deals.id, id));
 
       // Keep Make.com webhook alive if still configured
       if (ws?.makeWebhookUrl) {

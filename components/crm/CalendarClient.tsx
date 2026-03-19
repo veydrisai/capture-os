@@ -62,8 +62,8 @@ export default function CalendarClient() {
       const res = await fetch(
         `/api/calendar?timeMin=${encodeURIComponent(start)}&timeMax=${encodeURIComponent(end)}`
       );
-      if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to fetch bookings");
       setBookings(data.items ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error loading bookings");
@@ -116,6 +116,14 @@ export default function CalendarClient() {
 
   return (
     <PageShell title="Calendar" subtitle={format(currentDate, "MMMM yyyy")} actions={navActions}>
+      {error && (
+        <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <p style={{ fontSize: 13, color: "#fca5a5", margin: 0 }}>{error}</p>
+          <button onClick={fetchBookings} style={{ flexShrink: 0, padding: "5px 12px", borderRadius: 8, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", color: "#fca5a5", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
+            Retry
+          </button>
+        </div>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
         {/* Calendar Grid */}
         <div className="glass" style={{ overflow: "hidden" }}>
@@ -170,11 +178,6 @@ export default function CalendarClient() {
           {loading && (
             <div style={{ padding: "12px", textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.3)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
               Loading bookings...
-            </div>
-          )}
-          {error && (
-            <div style={{ padding: "12px", textAlign: "center", fontSize: 12, color: "#fca5a5", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-              {error}
             </div>
           )}
         </div>

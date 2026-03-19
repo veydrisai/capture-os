@@ -1,8 +1,9 @@
 
 import { useState } from "react";
-import { Plus, Search, Mail, Phone, MoreHorizontal, User } from "lucide-react";
+import { Plus, Search, Mail, Phone, MoreHorizontal, User, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ContactModal from "@/components/crm/ContactModal";
+import SendEmailModal from "@/components/crm/SendEmailModal";
 
 interface Contact {
   id: string;
@@ -28,6 +29,7 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
+  const [emailTarget, setEmailTarget] = useState<Contact | null>(null);
 
   async function load() {
     const res = await fetch("/api/contacts");
@@ -69,8 +71,8 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
         />
       </div>
 
-      <div className="glass" style={{ overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className="glass" style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               {["Name", "Company", "Email", "Phone", "Title", "Type", "Added", ""].map((h) => (
@@ -128,9 +130,20 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
                   {formatDistanceToNow(new Date(contact.createdAt), { addSuffix: true })}
                 </td>
                 <td style={{ padding: "12px 16px" }}>
-                  <button onClick={(e) => { e.stopPropagation(); setEditing(contact); setModalOpen(true); }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
-                    <MoreHorizontal size={15} />
-                  </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    {contact.email && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEmailTarget(contact); }}
+                        title="Send email"
+                        style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}
+                      >
+                        <Send size={14} />
+                      </button>
+                    )}
+                    <button onClick={(e) => { e.stopPropagation(); setEditing(contact); setModalOpen(true); }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
+                      <MoreHorizontal size={15} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -143,6 +156,12 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
           contact={editing}
           onClose={() => setModalOpen(false)}
           onSaved={() => { setModalOpen(false); load(); }}
+        />
+      )}
+      {emailTarget && (
+        <SendEmailModal
+          contact={emailTarget}
+          onClose={() => setEmailTarget(null)}
         />
       )}
     </div>

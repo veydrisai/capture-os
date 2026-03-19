@@ -23,6 +23,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   // Scalar fields
   if (body.businessName !== undefined) updates.businessName = body.businessName;
+  if (body.email !== undefined) updates.email = body.email || null;
+  if (body.contactId !== undefined) updates.contactId = body.contactId || null;
+  if (body.dealId !== undefined) updates.dealId = body.dealId || null;
   if (body.systemType !== undefined) updates.systemType = body.systemType || null;
   if (body.onboardingStatus !== undefined) updates.onboardingStatus = body.onboardingStatus;
   if (body.monthlyRetainer !== undefined) updates.monthlyRetainer = parseInt(body.monthlyRetainer) || 0;

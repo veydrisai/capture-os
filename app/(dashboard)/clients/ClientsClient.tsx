@@ -6,6 +6,9 @@ import ClientModal from "@/components/crm/ClientModal";
 interface Client {
   id: string;
   businessName: string;
+  email: string | null;
+  contactId: string | null;
+  dealId: string | null;
   systemType: string | null;
   onboardingStatus: string;
   intakeFormSent: boolean;

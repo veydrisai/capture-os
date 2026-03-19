@@ -1,0 +1,332 @@
+{
+  "name": "06 - Hail Storm Lead Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 0,
+              "triggerAtDay": [1, 2, 3, 4, 5, 6]
+            }
+          ]
+        }
+      },
+      "id": "cron-daily",
+      "name": "Cron - Daily 7AM (Mon-Sat)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 360]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "wfo", "value": "ALL" },
+            { "name": "recent", "value": "86400" },
+            { "name": "fmt", "value": "csv" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-hail-data",
+      "name": "HTTP - Fetch IEM Hail Reports",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 280]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse IEM CSV and filter for HAIL events >= 0.75 inches\nconst raw = $input.first().json.data || '';\nconst lines = raw.split('\\n').map(l => l.trim()).filter(l => l.length > 0);\n\nif (lines.length < 2) {\n  return [{ json: { hailEvents: [], count: 0 } }];\n}\n\nconst headers = lines[0].split(',').map(h => h.trim().replace(/^\"|\"$/g, ''));\nconst events = [];\nconst seenCities = new Set();\n\nfor (let i = 1; i < lines.length; i++) {\n  // Handle CSV with quoted fields\n  const values = lines[i].match(/(?:\"[^\"]*\"|[^,]*)(?:,|$)/g)\n    ?.map(v => v.replace(/,?$/, '').replace(/^\"|\"$/g, '').trim()) || lines[i].split(',');\n\n  const row = {};\n  headers.forEach((h, idx) => { row[h] = values[idx] || ''; });\n\n  const typetext = (row['typetext'] || row['type'] || '').toUpperCase();\n  const magnitude = parseFloat(row['magnitude'] || row['mag'] || '0');\n  const city = (row['city'] || '').trim();\n  const state = (row['st'] || row['state'] || '').trim().toUpperCase();\n  const lat = row['lat'] || '';\n  const lon = row['lon'] || '';\n  const county = row['county'] || '';\n  const timestamp = row['valid'] || row['utc_valid'] || '';\n\n  // Filter: HAIL only, size >= 0.75 inches, valid location\n  // Kansas (KS) and Missouri (MO) only\n  const targetStates = ['KS', 'MO'];\n  if (typetext === 'HAIL' && magnitude >= 0.75 && city && state && targetStates.includes(state)) {\n    const cityKey = `${city.toLowerCase()},${state}`;\n    // Deduplicate by city+state\n    if (!seenCities.has(cityKey)) {\n      seenCities.add(cityKey);\n      events.push({\n        city,\n        state,\n        county,\n        lat,\n        lon,\n        hailSize: magnitude,\n        timestamp,\n        cityKey\n      });\n    }\n  }\n}\n\nconsole.log(`Found ${events.length} unique cities with hail >= 0.75\"`);\n\nif (events.length === 0) {\n  // Return a no-op signal\n  return [{ json: { __noHail: true, message: 'No qualifying hail events in last 24 hours.' } }];\n}\n\nreturn events.map(e => ({ json: e }));"
+      },
+      "id": "parse-filter-csv",
+      "name": "Code - Parse CSV + Filter Hail",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 280]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.__noHail }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-no-hail",
+      "name": "Filter - Skip if No Hail Today",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [900, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://overpass-api.de/api/interpreter",
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "=[out:json];(node[\"addr:housenumber\"][\"addr:street\"](around:1500,{{ $json.lat }},{{ $json.lon }});way[\"building\"=\"house\"][\"addr:housenumber\"](around:1500,{{ $json.lat }},{{ $json.lon }}););out body;",
+        "options": {}
+      },
+      "id": "overpass-address-search",
+      "name": "HTTP - Overpass Get Addresses Near Hail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 280]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Overpass API response into address objects\nconst elements = $input.first().json.elements || [];\nconst hailCity = $('Filter - Skip if No Hail Today').item.json.city || '';\nconst hailState = $('Filter - Skip if No Hail Today').item.json.state || '';\nconst hailSize = $('Filter - Skip if No Hail Today').item.json.hailSize || '';\nconst hailDate = $('Filter - Skip if No Hail Today').item.json.timestamp || '';\n\nconst addresses = elements\n  .filter(el => el.tags && el.tags['addr:housenumber'] && el.tags['addr:street'])\n  .map(el => ({\n    street: `${el.tags['addr:housenumber']} ${el.tags['addr:street']}`,\n    city: el.tags['addr:city'] || hailCity,\n    state: el.tags['addr:state'] || hailState,\n    zip: el.tags['addr:postcode'] || '',\n    _hailSize: hailSize,\n    _hailDate: hailDate\n  }))\n  .filter(a => a.street && a.city && a.state);\n\nreturn addresses.map(a => ({ json: a }));"
+      },
+      "id": "parse-overpass-addresses",
+      "name": "Code - Parse Overpass Addresses",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 180]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "={{ $json.properties || $json.results || [] }}",
+        "include": "noOtherFields",
+        "options": {}
+      },
+      "id": "split-properties",
+      "name": "Split Out - Properties",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1340, 280]
+    },
+    {
+      "parameters": {
+        "batchSize": 20,
+        "options": {}
+      },
+      "id": "batch-for-skip-trace",
+      "name": "Batch - Groups of 20 for Skip Trace",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1560, 280]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build skip trace request from property results\nconst items = $input.all();\nconst requests = items.map(item => {\n  const prop = item.json;\n  const addr = prop.address || prop.propertyAddress || prop.siteAddress || {};\n  return {\n    propertyAddress: {\n      street: addr.street || addr.streetAddress || addr.line1 || prop.streetAddress || '',\n      city: addr.city || prop.city || '',\n      state: addr.state || prop.state || '',\n      zip: addr.zip || addr.postalCode || prop.zip || ''\n    }\n  };\n}).filter(r => r.propertyAddress.street);\n\nreturn [{ json: { requests } }];"
+      },
+      "id": "build-skip-trace-payload",
+      "name": "Code - Build Skip Trace Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.batchskiptracing.com/api/v1/property/skip-trace",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer Qb73o3rnpmaLU49FfNUQgj8qij26fJZYuZhGRJGy"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ requests: $json.requests }) }}",
+        "options": {}
+      },
+      "id": "batchdata-skip-trace",
+      "name": "HTTP - BatchSkipTracing Skip Trace",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 280]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract leads from skip trace results, filter DNC\nconst output = [];\n\n$input.all().forEach(item => {\n  const persons = (item.json.results || item.json.persons || []);\n  persons.forEach(person => {\n    if (!person || !person.name) return;\n\n    const firstName = person.name?.first || '';\n    const lastName = person.name?.last || '';\n    if (!firstName && !lastName) return;\n\n    // Get best phone: prefer mobile, non-DNC\n    const phones = [\n      ...(person.phoneNumbers || person.phones || []),\n      ...(person.mobilePhones || [])\n    ];\n    const cleanPhone = phones.find(p => {\n      const status = (p.dnc || p.dncStatus || p.status || '').toLowerCase();\n      return status !== 'dnc' && status !== 'do_not_call' && (p.number || p.phone);\n    });\n\n    if (!cleanPhone) return; // Skip DNC contacts\n\n    const phoneNumber = cleanPhone.number || cleanPhone.phone || '';\n    const email = (person.emails || person.emailAddresses || [])[0]?.email\n      || (person.emails || person.emailAddresses || [])[0] || '';\n\n    const propAddr = person.propertyAddress || person.property?.address || {};\n    const streetAddress = [\n      propAddr.street || propAddr.streetAddress || propAddr.line1 || '',\n      propAddr.city || '',\n      propAddr.state || ''\n    ].filter(Boolean).join(', ');\n\n    output.push({\n      json: {\n        firstName,\n        lastName,\n        email: typeof email === 'string' ? email : '',\n        phone: phoneNumber,\n        company: streetAddress,\n        source: 'hail_lead_gen',\n        systemInterest: 'hot_lead',\n        notes: `Hail storm lead. Property: ${streetAddress}. Hail size: ${person._hailSize || ''}\" Storm date: ${person._stormDate || new Date().toISOString().split('T')[0]}.`,\n        _city: propAddr.city || '',\n        _state: propAddr.state || ''\n      }\n    });\n  });\n});\n\nconsole.log(`Formatted ${output.length} DNC-clean leads`);\nreturn output;"
+      },
+      "id": "format-filter-leads",
+      "name": "Code - Format + Filter DNC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2220, 280]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "={{ $json }}",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "split-leads",
+      "name": "Split Out - Each Lead",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [2440, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://captureos.app/api/lead-capture",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-capture-secret", "value": "capturecsleads2026" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"firstName\": \"{{ $json.firstName }}\",\n  \"lastName\": \"{{ $json.lastName }}\",\n  \"email\": \"{{ $json.email }}\",\n  \"phone\": \"{{ $json.phone }}\",\n  \"company\": \"{{ $json.company }}\",\n  \"source\": \"hail_lead_gen\",\n  \"systemInterest\": \"hot_lead\",\n  \"notes\": \"{{ $json.notes }}\"\n}",
+        "options": {}
+      },
+      "id": "captureos-create-lead",
+      "name": "HTTP - CaptureOS Create Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2660, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://captureos.app/api/n8n-inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-n8n-secret", "value": "revenuecssecret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "action": "create_activity",
+          "type": "note",
+          "title": "Hail lead auto-generated via n8n",
+          "body": "Lead sourced from IEM hail storm data (KS/MO). Addresses via Overpass. Skip traced via BatchSkipTracing.",
+          "leadId": "={{ $json.leadId }}"
+        },
+        "options": {}
+      },
+      "id": "captureos-log-activity",
+      "name": "HTTP - CRM Log Activity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2880, 280]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate summary stats for internal email\nconst leads = $input.all();\nconst total = leads.length;\nconst cities = [...new Set(leads.map(l => l.json._city).filter(Boolean))];\nconst states = [...new Set(leads.map(l => l.json._state).filter(Boolean))];\nconst date = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n\nreturn [{\n  json: {\n    totalLeads: total,\n    citiesHit: cities.join(', ') || 'Various',\n    statesHit: states.join(', ') || 'Various',\n    date\n  }\n}];"
+      },
+      "id": "build-summary",
+      "name": "Code - Build Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3100, 280]
+    },
+    {
+      "parameters": {
+        "fromEmail": "michael@revenuecs.com",
+        "toEmail": "michael@revenuecs.com",
+        "subject": "=\u26a1 Hail Lead Gen \u2014 {{ $json.totalLeads }} new leads | {{ $json.date }}",
+        "emailFormat": "html",
+        "message": "<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:32px 20px;\">\n<table width=\"540\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n<tr><td style=\"background:#0f0f0f;padding:24px 32px;\">\n  <p style=\"margin:0;font-size:11px;font-weight:700;letter-spacing:0.12em;color:#fbbf24;text-transform:uppercase;\">Hail Lead Generator \u2014 RevenueCS</p>\n  <h2 style=\"margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;\">&#9889; {{ $json.totalLeads }} new leads generated</h2>\n</td></tr>\n<tr><td style=\"padding:28px 32px;\">\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border-radius:8px;width:100%;margin-bottom:20px;\">\n    <tr><td style=\"padding:16px 20px;\">\n      <p style=\"margin:0 0 8px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;\">Run Summary</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>Date:</strong> {{ $json.date }}</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>Total leads:</strong> {{ $json.totalLeads }}</p>\n      <p style=\"margin:0 0 4px;font-size:14px;color:#111827;\"><strong>Cities hit:</strong> {{ $json.citiesHit }}</p>\n      <p style=\"margin:0;font-size:14px;color:#111827;\"><strong>States:</strong> {{ $json.statesHit }}</p>\n    </td></tr>\n  </table>\n  <p style=\"margin:0;font-size:13px;color:#6b7280;\">All leads are DNC-clean and have been added to CaptureOS with source: hail_lead_gen. Ready for outbound calling.</p>\n</td></tr>\n</table></td></tr></table></body></html>",
+        "options": {}
+      },
+      "id": "email-summary",
+      "name": "Email - Internal Summary",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [3320, 280],
+      "credentials": {
+        "smtp": {
+          "id": "LViY7g19KwnPtnEG",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 06 - Hail Storm Lead Generator\n\n**What it does:**\n1. Fetches hail storm reports from NOAA/IEM (last 24 hrs)\n2. Filters: HAIL events only, size ≥ 0.75 inches, deduplicates by city\n3. Searches for owner-occupied SFR properties in each affected city via BatchData\n4. Skip traces each property → owner name, phone, email\n5. Filters out DNC-flagged numbers\n6. Creates leads in CaptureOS with source: hail_lead_gen\n7. Sends internal summary email\n\n**Required setup:**\n- Set `BATCHDATA_API_KEY` in n8n environment variables\n- Get key at: batchdata.io\n\n**Cost:** ~$0.01–0.02 per lead (BatchData)\n**Runs:** Daily 7AM Mon–Sat + manual trigger",
+        "height": 400,
+        "width": 500
+      },
+      "id": "sticky-overview",
+      "name": "Sticky Note - Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 480]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "HTTP - Fetch IEM Hail Reports", "type": "main", "index": 0 }]]
+    },
+    "Cron - Daily 7AM (Mon-Sat)": {
+      "main": [[{ "node": "HTTP - Fetch IEM Hail Reports", "type": "main", "index": 0 }]]
+    },
+    "HTTP - Fetch IEM Hail Reports": {
+      "main": [[{ "node": "Code - Parse CSV + Filter Hail", "type": "main", "index": 0 }]]
+    },
+    "Code - Parse CSV + Filter Hail": {
+      "main": [[{ "node": "Filter - Skip if No Hail Today", "type": "main", "index": 0 }]]
+    },
+    "Filter - Skip if No Hail Today": {
+      "main": [[{ "node": "HTTP - Overpass Get Addresses Near Hail", "type": "main", "index": 0 }]]
+    },
+    "HTTP - Overpass Get Addresses Near Hail": {
+      "main": [[{ "node": "Code - Parse Overpass Addresses", "type": "main", "index": 0 }]]
+    },
+    "Code - Parse Overpass Addresses": {
+      "main": [[{ "node": "Batch - Groups of 20 for Skip Trace", "type": "main", "index": 0 }]]
+    },
+    "Batch - Groups of 20 for Skip Trace": {
+      "main": [[{ "node": "Code - Build Skip Trace Payload", "type": "main", "index": 0 }]]
+    },
+    "Code - Build Skip Trace Payload": {
+      "main": [[{ "node": "HTTP - BatchData Skip Trace", "type": "main", "index": 0 }]]
+    },
+    "HTTP - BatchData Skip Trace": {
+      "main": [[{ "node": "Code - Format + Filter DNC", "type": "main", "index": 0 }]]
+    },
+    "Code - Format + Filter DNC": {
+      "main": [[{ "node": "Split Out - Each Lead", "type": "main", "index": 0 }]]
+    },
+    "Split Out - Each Lead": {
+      "main": [[{ "node": "HTTP - CaptureOS Create Lead", "type": "main", "index": 0 }]]
+    },
+    "HTTP - CaptureOS Create Lead": {
+      "main": [[{ "node": "HTTP - CRM Log Activity", "type": "main", "index": 0 }]]
+    },
+    "HTTP - CRM Log Activity": {
+      "main": [[{ "node": "Code - Build Summary", "type": "main", "index": 0 }]]
+    },
+    "Code - Build Summary": {
+      "main": [[{ "node": "Email - Internal Summary", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  }
+}
