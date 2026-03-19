@@ -76,7 +76,7 @@ export default function DashboardLayout({ loaderData }: { loaderData: Awaited<Re
             </svg>
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src="/logo.svg" alt="CaptureOS" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2, boxShadow: "0 2px 10px rgba(168,255,71,0.25)" }} />
+            <img src="/logo.svg" alt="CaptureOS" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "contain", boxShadow: "0 2px 10px rgba(168,255,71,0.25)" }} />
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "white" }}>CaptureOS</span>
           </div>
           <div style={{ width: 32 }} />

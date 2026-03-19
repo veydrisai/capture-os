@@ -3,6 +3,8 @@ import type { LinksFunction } from "react-router";
 import stylesheet from "./globals.css?url";
 
 export const links: LinksFunction = () => [
+  { rel: "icon", href: "/logo.svg", type: "image/svg+xml" },
+  { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
   { rel: "stylesheet", href: stylesheet },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },

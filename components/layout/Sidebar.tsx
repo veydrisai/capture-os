@@ -41,7 +41,7 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
 
       <div style={{ padding: "6px 10px 28px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/logo.svg" alt="CaptureOS" style={{ width: 34, height: 34, borderRadius: 10, objectFit: "contain", background: "#fff", padding: 3, flexShrink: 0, boxShadow: "0 4px 14px rgba(168,255,71,0.25)" }} />
+          <img src="/logo.svg" alt="CaptureOS" style={{ width: 34, height: 34, borderRadius: 10, objectFit: "contain", flexShrink: 0, boxShadow: "0 4px 14px rgba(168,255,71,0.25)" }} />
           <div>
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "white", display: "block" }}>CaptureOS</span>
             <span style={{ fontSize: 10, color: "rgba(168,255,71,0.5)", fontWeight: 500, letterSpacing: "0.03em" }}>revcapturesystem.com</span>
