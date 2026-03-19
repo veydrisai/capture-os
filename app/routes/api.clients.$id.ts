@@ -48,15 +48,19 @@ export async function action({ request, params }: { request: Request; params: { 
     body.onboardingStatus === "live" &&
     existing?.onboardingStatus !== "live"
   ) {
-    await clientGoLive.trigger({
-      clientId: row.id,
-      businessName: row.businessName,
-      email: row.email ?? null,
-      systemType: row.systemType ?? null,
-      goLiveDate: row.goLiveDate?.toISOString() ?? new Date().toISOString(),
-      roiDashboardUrl: row.roiDashboardUrl ?? null,
-      monthlyRetainer: row.monthlyRetainer ?? null,
-    });
+    try {
+      await clientGoLive.trigger({
+        clientId: row.id,
+        businessName: row.businessName,
+        email: row.email ?? null,
+        systemType: row.systemType ?? null,
+        goLiveDate: row.goLiveDate?.toISOString() ?? new Date().toISOString(),
+        roiDashboardUrl: row.roiDashboardUrl ?? null,
+        monthlyRetainer: row.monthlyRetainer ?? null,
+      });
+    } catch (err) {
+      console.error("[clients] clientGoLive.trigger failed:", err);
+    }
   }
 
   return Response.json(row);

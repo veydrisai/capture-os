@@ -80,17 +80,25 @@ export async function action({ request, params }: { request: Request; params: { 
 
     // ── proposal_sent → send agreement link via Trigger.dev ──────────────────
     if (body.stage === "proposal_sent") {
-      await demoDoneAgreementSender.trigger(basePayload);
+      try {
+        await demoDoneAgreementSender.trigger(basePayload);
+      } catch (err) {
+        console.error("[deals] demoDoneAgreementSender.trigger failed:", err);
+      }
     }
 
     // ── agreement_signed → kick off onboarding via Trigger.dev ───────────
     if (body.stage === "agreement_signed" && !existing?.webhookFired) {
       // Mark flag FIRST to prevent double-fire if trigger call succeeds but flag update fails
       await db.update(deals).set({ webhookFired: true }).where(eq(deals.id, id));
-      await agreementSignedOnboarding.trigger({
-        ...basePayload,
-        agreementSignedAt: now.toISOString(),
-      });
+      try {
+        await agreementSignedOnboarding.trigger({
+          ...basePayload,
+          agreementSignedAt: now.toISOString(),
+        });
+      } catch (err) {
+        console.error("[deals] agreementSignedOnboarding.trigger failed:", err);
+      }
 
       // Keep Make.com webhook alive if still configured
       if (ws?.makeWebhookUrl) {
@@ -108,13 +116,17 @@ export async function action({ request, params }: { request: Request; params: { 
 
     // ── demo_booked → internal alert via Trigger.dev ──────────────────────
     if (body.stage === "demo_booked") {
-      await demoBookedAlert.trigger({
-        dealId: row.id,
-        dealTitle: row.title ?? "",
-        contactEmail: basePayload.contactEmail,
-        contactName: basePayload.contactName,
-        demoBookedAt: (updates.demoBookedAt as Date | undefined)?.toISOString() ?? now.toISOString(),
-      });
+      try {
+        await demoBookedAlert.trigger({
+          dealId: row.id,
+          dealTitle: row.title ?? "",
+          contactEmail: basePayload.contactEmail,
+          contactName: basePayload.contactName,
+          demoBookedAt: (updates.demoBookedAt as Date | undefined)?.toISOString() ?? now.toISOString(),
+        });
+      } catch (err) {
+        console.error("[deals] demoBookedAlert.trigger failed:", err);
+      }
     }
   }
 

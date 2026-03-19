@@ -56,17 +56,21 @@ export async function action({ request }: { request: Request }) {
     status: "new",
   }).returning();
 
-  // Fire Trigger.dev lead notification
-  await processInboundLead.trigger({
-    leadId: row.id,
-    firstName: row.firstName,
-    lastName: row.lastName,
-    email: row.email ?? email,
-    phone: row.phone,
-    company: row.company,
-    systemInterest: row.systemInterest,
-    source: "website",
-  });
+  // Fire Trigger.dev lead notification (non-blocking — don't fail the request if unavailable)
+  try {
+    await processInboundLead.trigger({
+      leadId: row.id,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      email: row.email ?? email,
+      phone: row.phone,
+      company: row.company,
+      systemInterest: row.systemInterest,
+      source: "website",
+    });
+  } catch (err) {
+    console.error("[lead-capture] processInboundLead.trigger failed:", err);
+  }
 
   return Response.json({ ok: true, leadId: row.id }, { status: 201 });
 }

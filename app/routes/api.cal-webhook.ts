@@ -141,18 +141,22 @@ export async function action({ request }: { request: Request }) {
     }
   }
 
-  // Fire Trigger.dev lead notification
-  await processInboundLead.trigger({
-    leadId: row.id,
-    firstName,
-    lastName,
-    email,
-    phone: phone ?? null,
-    company: company ?? null,
-    systemInterest: systemInterest ?? null,
-    source: "cal.com",
-    notes,
-  });
+  // Fire Trigger.dev lead notification (non-blocking)
+  try {
+    await processInboundLead.trigger({
+      leadId: row.id,
+      firstName,
+      lastName,
+      email,
+      phone: phone ?? null,
+      company: company ?? null,
+      systemInterest: systemInterest ?? null,
+      source: "cal.com",
+      notes,
+    });
+  } catch (err) {
+    console.error("[cal-webhook] processInboundLead.trigger failed:", err);
+  }
 
   return Response.json({ ok: true, leadId: row.id });
   } catch (err) {
