@@ -6,6 +6,8 @@
     "drizzle/**/*",
     "components/**/*",
     "types/**/*",
+    "trigger/**/*",
+    "trigger.config.ts",
     "vite.config.ts",
     "react-router.config.ts"
   ],

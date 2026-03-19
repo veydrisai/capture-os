@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { clients, workspaceSettings } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { requireUser } from "@/app/sessions.server";
-import { triggerN8n } from "@/lib/n8n.server";
+import { clientGoLive } from "@/trigger/client-live";
 
 export async function action({ request, params }: { request: Request; params: { id: string } }) {
   await requireUser(request);
@@ -43,21 +43,19 @@ export async function action({ request, params }: { request: Request; params: { 
     updatedAt: new Date(),
   }).where(eq(clients.id, id)).returning();
 
-  // ── client went live → notify n8n ────────────────────────────────────────
+  // ── client went live → fire Trigger.dev task ─────────────────────────────
   if (
     body.onboardingStatus === "live" &&
     existing?.onboardingStatus !== "live"
   ) {
-    const [ws] = await db.select().from(workspaceSettings).limit(1);
-    await triggerN8n(ws?.n8nWebhookUrl, "client.live", {
+    await clientGoLive.trigger({
       clientId: row.id,
       businessName: row.businessName,
-      email: row.email,
-      systemType: row.systemType,
+      email: row.email ?? null,
+      systemType: row.systemType ?? null,
       goLiveDate: row.goLiveDate?.toISOString() ?? new Date().toISOString(),
-      roiDashboardUrl: row.roiDashboardUrl,
-      monthlyRetainer: row.monthlyRetainer,
-      internalEmail: ws?.internalEmail,
+      roiDashboardUrl: row.roiDashboardUrl ?? null,
+      monthlyRetainer: row.monthlyRetainer ?? null,
     });
   }
 

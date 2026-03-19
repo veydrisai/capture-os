@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { leads, workspaceSettings } from "@/drizzle/schema";
-import { triggerN8n } from "@/lib/n8n.server";
+import { leads } from "@/drizzle/schema";
+import { processInboundLead } from "@/trigger/lead-inbound";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
@@ -56,18 +56,16 @@ export async function action({ request }: { request: Request }) {
     status: "new",
   }).returning();
 
-  // Fire n8n Play B — inbound lead automation
-  const [ws] = await db.select().from(workspaceSettings).limit(1);
-  await triggerN8n(ws?.n8nWebhookUrl, "lead.inbound", {
+  // Fire Trigger.dev lead notification
+  await processInboundLead.trigger({
     leadId: row.id,
     firstName: row.firstName,
     lastName: row.lastName,
-    email: row.email,
+    email: row.email ?? email,
     phone: row.phone,
     company: row.company,
     systemInterest: row.systemInterest,
     source: "website",
-    internalEmail: ws?.internalEmail,
   });
 
   return Response.json({ ok: true, leadId: row.id }, { status: 201 });

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { leads } from "@/drizzle/schema";
+import { processInboundLead } from "@/trigger/lead-inbound";
 
 /**
  * Cal.com webhook endpoint — receives BOOKING_CREATED events directly.
@@ -9,6 +10,29 @@ import { leads } from "@/drizzle/schema";
 export async function action({ request }: { request: Request }) {
   if (request.method !== "POST") {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
+  }
+
+  // Validate Cal.com webhook secret
+  const calSecret = process.env.CAL_WEBHOOK_SECRET;
+  if (calSecret) {
+    const signature = request.headers.get("x-cal-signature-256");
+    if (!signature) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // Cal.com signs with HMAC-SHA256; verify using Web Crypto API
+    const rawBody = await request.clone().text();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(calSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
+    const expected = Array.from(new Uint8Array(mac)).map(b => b.toString(16).padStart(2, "0")).join("");
+    if (signature !== expected) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   let body: unknown;
@@ -111,6 +135,19 @@ export async function action({ request }: { request: Request }) {
       console.error("[cal-webhook] Email send failed:", err);
     }
   }
+
+  // Fire Trigger.dev lead notification
+  await processInboundLead.trigger({
+    leadId: row.id,
+    firstName,
+    lastName,
+    email,
+    phone: phone ?? null,
+    company: company ?? null,
+    systemInterest: systemInterest ?? null,
+    source: "cal.com",
+    notes,
+  });
 
   return Response.json({ ok: true, leadId: row.id });
   } catch (err) {

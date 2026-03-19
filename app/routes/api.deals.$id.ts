@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { deals, contacts, workspaceSettings } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { requireUser } from "@/app/sessions.server";
-import { triggerN8n } from "@/lib/n8n.server";
+import { demoDoneAgreementSender, agreementSignedOnboarding, demoBookedAlert } from "@/trigger/deal-automation";
 
 export async function action({ request, params }: { request: Request; params: { id: string } }) {
   await requireUser(request);
@@ -70,26 +70,20 @@ export async function action({ request, params }: { request: Request; params: { 
       monthlyRetainer: row.monthlyRetainer,
     };
 
-    // ── proposal_sent → rep confirmed prospect is ready, auto-send agreement ─
+    // ── proposal_sent → send agreement link via Trigger.dev ──────────────────
     if (body.stage === "proposal_sent") {
-      await triggerN8n(ws?.n8nWebhookUrl, "deal.proposal_sent", {
-        ...basePayload,
-        agreementTemplateUrl: ws?.agreementTemplateUrl,
-        internalEmail: ws?.internalEmail,
-      });
+      await demoDoneAgreementSender.trigger(basePayload);
     }
 
-    // ── agreement_signed → kick off onboarding + intake form ───────────────
+    // ── agreement_signed → kick off onboarding via Trigger.dev ───────────
     if (body.stage === "agreement_signed" && !existing?.webhookFired) {
-      await triggerN8n(ws?.n8nWebhookUrl, "deal.agreement_signed", {
+      await agreementSignedOnboarding.trigger({
         ...basePayload,
-        intakeFormUrl: ws?.intakeFormUrl,
-        internalEmail: ws?.internalEmail,
         agreementSignedAt: now.toISOString(),
       });
       await db.update(deals).set({ webhookFired: true }).where(eq(deals.id, id));
 
-      // Keep existing Make.com webhook alive if still configured
+      // Keep Make.com webhook alive if still configured
       if (ws?.makeWebhookUrl) {
         try {
           await fetch(ws.makeWebhookUrl, {
@@ -103,12 +97,14 @@ export async function action({ request, params }: { request: Request; params: { 
       }
     }
 
-    // ── demo_booked → confirmation email ───────────────────────────────────
+    // ── demo_booked → internal alert via Trigger.dev ──────────────────────
     if (body.stage === "demo_booked") {
-      await triggerN8n(ws?.n8nWebhookUrl, "deal.demo_booked", {
-        ...basePayload,
+      await demoBookedAlert.trigger({
+        dealId: row.id,
+        dealTitle: row.title ?? "",
+        contactEmail: basePayload.contactEmail,
+        contactName: basePayload.contactName,
         demoBookedAt: (updates.demoBookedAt as Date | undefined)?.toISOString() ?? now.toISOString(),
-        internalEmail: ws?.internalEmail,
       });
     }
   }

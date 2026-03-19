@@ -20,11 +20,28 @@ export async function loader({ request }: { request: Request }) {
 
   try {
     const res = await fetch(`${CALCOM_BASE}/bookings?${params}`);
-    if (!res.ok) throw new Error(`Cal.com API error: ${res.status}`);
-    const data = await res.json();
+    const text = await res.text();
+
+    if (!res.ok) {
+      console.error(`[api.calendar] Cal.com error ${res.status}:`, text);
+      return Response.json(
+        { error: `Cal.com API error ${res.status}: ${text.slice(0, 200)}` },
+        { status: 502 }
+      );
+    }
+
+    let data: { bookings?: unknown[] };
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("[api.calendar] Invalid JSON from Cal.com:", text.slice(0, 200));
+      return Response.json({ error: "Invalid response from Cal.com API" }, { status: 502 });
+    }
+
     return Response.json({ items: data.bookings ?? [] });
   } catch (err: unknown) {
-    console.error("Cal.com calendar fetch error:", err instanceof Error ? err.message : err);
-    return Response.json({ error: "Failed to fetch Cal.com bookings" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "Failed to fetch Cal.com bookings";
+    console.error("[api.calendar] Fetch error:", msg);
+    return Response.json({ error: msg }, { status: 500 });
   }
 }

@@ -13,7 +13,9 @@
     "db:studio": "drizzle-kit studio",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "trigger:dev": "npx trigger.dev@latest dev",
+    "trigger:deploy": "npx trigger.dev@latest deploy"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -30,6 +32,7 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "@react-router/node": "^7.13.1",
     "@react-router/serve": "^7.13.1",
+    "@trigger.dev/sdk": "^4.4.3",
     "@types/nodemailer": "^7.0.11",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

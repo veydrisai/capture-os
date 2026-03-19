@@ -1,21 +1,12 @@
 /**
- * Fires an event webhook to n8n.
- * Pass the n8nWebhookUrl from workspace settings (the base URL),
- * and the function appends the event path automatically.
+ * Migrated to Trigger.dev. This function is a no-op kept for backwards compatibility.
+ * All automation is now handled via trigger/ task files.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function triggerN8n(
-  baseUrl: string | null | undefined,
-  event: string,
-  payload: Record<string, unknown>
+  _baseUrl: string | null | undefined,
+  _event: string,
+  _payload: Record<string, unknown>
 ): Promise<void> {
-  if (!baseUrl) return;
-  try {
-    await fetch(baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event, ...payload, timestamp: new Date().toISOString() }),
-    });
-  } catch (err) {
-    console.error(`[n8n] Failed to fire event "${event}":`, err);
-  }
+  // No-op: automation migrated to Trigger.dev
 }
