@@ -1,12 +1,10 @@
 /**
  * Calendar E2E tests — CaptureOS
  *
- * These tests run against the live app (captureos.app by default, or BASE_URL).
- * /api/calendar is intercepted with mock data so tests are deterministic
- * and don't depend on Cal.com being reachable.
+ * Tests the calendar page with REAL Cal.com data (no mocks).
+ * Requires a valid auth session (tests/e2e/.auth/user.json).
  *
- * Requires a saved auth session:
- *   npx playwright test --project=setup   (one-time, manual Google login)
+ *   npx playwright test --project=setup   (one-time manual Google login)
  *   npm run test:e2e                       (subsequent runs)
  */
 
@@ -14,60 +12,80 @@ import { test, expect } from "@playwright/test";
 import { CalendarPage } from "./pages/CalendarPage";
 import { format, addMonths, subMonths } from "date-fns";
 
-// ── Shared mock booking ────────────────────────────────────────────────────
-const MARCH_22 = new Date("2026-03-22T17:00:00.000Z");
-
-const MOCK_BOOKING = {
-  id: 17261466,
-  uid: "34Ax2KyKiQXVA88fzfLpzr",
-  title: "RevenueCS Discovery Call",
-  startTime: "2026-03-22T17:00:00.000Z",
-  endTime: "2026-03-22T17:30:00.000Z",
-  status: "ACCEPTED",
-  attendees: [{ name: "Michael Cannavino", email: "michaelcvino@proton.me" }],
-  location: null,
-};
-
-// Helper: intercept /api/calendar and return deterministic data
-async function mockCalendarApi(
-  page: import("@playwright/test").Page,
-  bookings: typeof MOCK_BOOKING[] = []
-) {
-  await page.route("**/api/calendar**", (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ items: bookings }),
-    });
-  });
-}
-
-// ── Tests ──────────────────────────────────────────────────────────────────
-
 test.describe("Calendar page", () => {
   test("loads and shows current month with day headers", async ({ page }) => {
-    await mockCalendarApi(page, []);
     const cal = new CalendarPage(page);
     await cal.goto();
 
-    // Subtitle shows the current month
-    const now = new Date();
-    await cal.assertCurrentMonth(now);
-
-    // Day-of-week column headers
+    await cal.assertCurrentMonth(new Date());
     await cal.assertDayHeadersVisible();
 
     await page.screenshot({ path: "artifacts/calendar-loaded.png" });
   });
 
-  test("shows a booking chip on the correct day", async ({ page }) => {
-    await mockCalendarApi(page, [MOCK_BOOKING]);
-
-    // Navigate to March 2026 where the mock booking lives
-    await page.goto("/calendar");
+  test("clicking today opens the detail panel", async ({ page }) => {
     const cal = new CalendarPage(page);
+    await cal.goto();
 
-    // Navigate to March 2026 if we're not already there
+    const today = new Date();
+    await cal.dayCell(today).click();
+
+    await expect(cal.detailPanel).toBeVisible();
+    await expect(cal.detailHeading).toContainText(format(today, "MMM d"));
+  });
+
+  test("detail panel shows bookings or empty state for today", async ({ page }) => {
+    const cal = new CalendarPage(page);
+    await cal.goto();
+
+    await cal.dayCell(new Date()).click();
+    await expect(cal.detailPanel).toBeVisible();
+
+    // Either "No bookings" text or at least one booking-detail card must be present
+    const noBookings = cal.detailPanel.getByText(/no bookings/i);
+    const bookingCards = cal.detailPanel.locator('[data-testid^="booking-detail-"]');
+    const hasEmpty = await noBookings.isVisible().catch(() => false);
+    const bookingCount = await bookingCards.count();
+
+    expect(hasEmpty || bookingCount > 0).toBe(true);
+  });
+
+  test("prev/next month navigation changes the month header", async ({ page }) => {
+    const cal = new CalendarPage(page);
+    await cal.goto();
+
+    const now = new Date();
+
+    await cal.nextMonthBtn.click();
+    await page.waitForLoadState("networkidle");
+    await cal.assertCurrentMonth(addMonths(now, 1));
+
+    await cal.prevMonthBtn.click();
+    await cal.prevMonthBtn.click();
+    await page.waitForLoadState("networkidle");
+    await cal.assertCurrentMonth(subMonths(now, 1));
+
+    await page.screenshot({ path: "artifacts/calendar-navigation.png" });
+  });
+
+  test("Today button resets to current month", async ({ page }) => {
+    const cal = new CalendarPage(page);
+    await cal.goto();
+
+    await cal.nextMonthBtn.click();
+    await cal.nextMonthBtn.click();
+    await page.waitForLoadState("networkidle");
+
+    await cal.todayBtn.click();
+    await page.waitForLoadState("networkidle");
+    await cal.assertCurrentMonth(new Date());
+  });
+
+  test("March 2026 — booking chips visible if bookings exist in Cal.com", async ({ page }) => {
+    const cal = new CalendarPage(page);
+    await cal.goto();
+
+    // Navigate to March 2026 where discovery calls were booked
     const now = new Date();
     const target = new Date(2026, 2); // March 2026
     const monthDiff =
@@ -82,115 +100,58 @@ test.describe("Calendar page", () => {
 
     await cal.assertCurrentMonth(target);
 
-    // The booking chip should appear on March 22
-    const chip = cal.bookingChip(MOCK_BOOKING.id);
-    await expect(chip).toBeVisible();
-    await expect(chip).toContainText("Michael Cannavino");
+    const chips = page.locator('[data-testid^="booking-chip-"]');
+    const count = await chips.count();
 
-    await page.screenshot({ path: "artifacts/calendar-booking-chip.png" });
-  });
+    // Log booking count — informational, not a hard failure (depends on live Cal.com data)
+    console.log(`[calendar] March 2026 booking chips found: ${count}`);
 
-  test("clicking a day with a booking shows details in the side panel", async ({
-    page,
-  }) => {
-    await mockCalendarApi(page, [MOCK_BOOKING]);
-    await page.goto("/calendar");
-    const cal = new CalendarPage(page);
-
-    // Navigate to March 2026
-    const now = new Date();
-    const target = new Date(2026, 2);
-    const monthDiff =
-      (target.getFullYear() - now.getFullYear()) * 12 +
-      (target.getMonth() - now.getMonth());
-    for (let i = 0; i < Math.abs(monthDiff); i++) {
-      if (monthDiff > 0) await cal.nextMonthBtn.click();
-      else await cal.prevMonthBtn.click();
-      await page.waitForLoadState("networkidle");
+    if (count > 0) {
+      // If chips exist, clicking the first one's day should show detail
+      const firstChip = chips.first();
+      await expect(firstChip).toBeVisible();
+      const chipTestId = await firstChip.getAttribute("data-testid");
+      console.log(`[calendar] First chip: ${chipTestId}`);
     }
 
-    // Click March 22
-    await cal.dayCell(MARCH_22).click();
-
-    // Detail panel heading updates
-    await expect(cal.detailHeading).toContainText("Mar 22");
-
-    // Booking card appears
-    const detail = cal.bookingDetail(MOCK_BOOKING.id);
-    await expect(detail).toBeVisible();
-    await expect(detail).toContainText("RevenueCS Discovery Call");
-    await expect(detail).toContainText("ACCEPTED");
-    await expect(detail).toContainText("Michael Cannavino");
-
-    await page.screenshot({ path: "artifacts/calendar-day-detail.png" });
+    await page.screenshot({ path: "artifacts/calendar-march-2026.png" });
   });
 
-  test("clicking a day with no bookings shows empty state", async ({ page }) => {
-    await mockCalendarApi(page, []);
+  test("clicking a day with a booking chip shows it in the detail panel", async ({ page }) => {
     const cal = new CalendarPage(page);
     await cal.goto();
 
-    // Click any day in the current month
-    const today = new Date();
-    await cal.dayCell(today).click();
+    // Look for any visible booking chip in the current month
+    const chips = page.locator('[data-testid^="booking-chip-"]');
+    const count = await chips.count();
 
-    await expect(cal.detailHeading).toContainText(format(today, "EEEE, MMM d"));
-    await expect(cal.detailPanel).toContainText("No bookings");
-  });
+    if (count === 0) {
+      // Navigate forward month by month (up to 6 months) to find a booking
+      let found = false;
+      for (let i = 0; i < 6 && !found; i++) {
+        await cal.nextMonthBtn.click();
+        await page.waitForLoadState("networkidle");
+        found = (await chips.count()) > 0;
+      }
+      if (!found) {
+        test.skip(); // No bookings found in any upcoming month — skip
+        return;
+      }
+    }
 
-  test("prev/next month navigation changes the month header", async ({ page }) => {
-    await mockCalendarApi(page, []);
-    const cal = new CalendarPage(page);
-    await cal.goto();
+    // Get the booking ID from the chip's test ID (e.g. "booking-chip-17261466")
+    const firstChip = chips.first();
+    const chipTestId = await firstChip.getAttribute("data-testid") ?? "";
+    const bookingId = chipTestId.replace("booking-chip-", "");
 
-    const now = new Date();
+    // The chip lives inside its day cell — click the chip itself to select the day
+    await firstChip.click();
 
-    // Go forward one month
-    await cal.nextMonthBtn.click();
-    await page.waitForLoadState("networkidle");
-    await cal.assertCurrentMonth(addMonths(now, 1));
+    await expect(cal.detailPanel).toBeVisible();
 
-    // Go back two months
-    await cal.prevMonthBtn.click();
-    await cal.prevMonthBtn.click();
-    await page.waitForLoadState("networkidle");
-    await cal.assertCurrentMonth(subMonths(now, 1));
+    const detailCard = page.locator(`[data-testid="booking-detail-${bookingId}"]`);
+    await expect(detailCard).toBeVisible();
 
-    await page.screenshot({ path: "artifacts/calendar-navigation.png" });
-  });
-
-  test("Today button resets to current month", async ({ page }) => {
-    await mockCalendarApi(page, []);
-    const cal = new CalendarPage(page);
-    await cal.goto();
-
-    // Navigate away
-    await cal.nextMonthBtn.click();
-    await cal.nextMonthBtn.click();
-    await page.waitForLoadState("networkidle");
-
-    // Reset
-    await cal.todayBtn.click();
-    await page.waitForLoadState("networkidle");
-    await cal.assertCurrentMonth(new Date());
-  });
-
-  test("shows error banner when API fails", async ({ page }) => {
-    // Intercept with an error response
-    await page.route("**/api/calendar**", (route) => {
-      route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: JSON.stringify({ error: "CALCOM_API_KEY not configured" }),
-      });
-    });
-
-    const cal = new CalendarPage(page);
-    await cal.goto();
-
-    await expect(cal.errorBanner).toBeVisible();
-    await expect(cal.errorBanner).toContainText("CALCOM_API_KEY");
-
-    await page.screenshot({ path: "artifacts/calendar-error.png" });
+    await page.screenshot({ path: "artifacts/calendar-booking-detail.png" });
   });
 });

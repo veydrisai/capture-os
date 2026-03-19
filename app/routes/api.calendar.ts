@@ -1,11 +1,12 @@
 import { requireUser } from "@/app/sessions.server";
 
-const CALCOM_API_KEY = process.env.CALCOM_API_KEY;
 const CALCOM_BASE = "https://api.cal.com/v1";
 
 export async function loader({ request }: { request: Request }) {
   await requireUser(request);
 
+  // Read fresh on every request so env var changes take effect after redeploy
+  const CALCOM_API_KEY = process.env.CALCOM_API_KEY;
   if (!CALCOM_API_KEY) {
     return Response.json({ error: "CALCOM_API_KEY not configured" }, { status: 500 });
   }
