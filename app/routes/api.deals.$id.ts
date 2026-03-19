@@ -5,6 +5,22 @@ import type { InferInsertModel } from "drizzle-orm";
 import { requireUser } from "@/app/sessions.server";
 import { demoDoneAgreementSender, agreementSignedOnboarding, demoBookedAlert } from "@/trigger/deal-automation";
 
+export async function loader({ request, params }: { request: Request; params: { id: string } }) {
+  await requireUser(request);
+  const { id } = params;
+  const [deal] = await db.select().from(deals).where(eq(deals.id, id));
+  if (!deal) return Response.json({ error: "Not found" }, { status: 404 });
+
+  // Include linked contact if present
+  let contact = null;
+  if (deal.contactId) {
+    const [c] = await db.select().from(contacts).where(eq(contacts.id, deal.contactId));
+    contact = c ?? null;
+  }
+
+  return Response.json({ ...deal, contact });
+}
+
 function clampInt(val: unknown, min = 0, max = 10_000_000): number {
   const n = parseInt(String(val), 10);
   if (isNaN(n)) return 0;
