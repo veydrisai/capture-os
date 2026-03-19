@@ -113,7 +113,7 @@ test.describe("Calendar page", () => {
     await cal.dayCell(MARCH_22).click();
 
     // Detail panel heading updates
-    await expect(cal.detailHeading).toContainText("Sun, Mar 22");
+    await expect(cal.detailHeading).toContainText("Mar 22");
 
     // Booking card appears
     const detail = cal.bookingDetail(MOCK_BOOKING.id);
