@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../../../trigger.config.ts"],
-  "sourcesContent": ["import { defineConfig } from \"@trigger.dev/sdk/v3\";\n\nexport default defineConfig({\n  project: (process.env.TRIGGER_PROJECT_REF ?? \"proj_faunavpdzjxftdrqtzlm\") as string,\n  dirs: [\"./trigger\"],\n\n  // 5 minutes max per task run\n  maxDuration: 300,\n\n  build: {}\n} as Parameters<typeof defineConfig>[0]);\nexport const resolveEnvVars = undefined;"],
-  "mappings": ";;;;;;;;;AAAA;AAEA,IAAO,yBAAQ,aAAa;AAAA,EAC1B,SAAU,QAAQ,IAAI,uBAAuB;AAAA,EAC7C,MAAM,CAAC,WAAW;AAAA;AAAA,EAGlB,aAAa;AAAA,EAEb,OAAO,CAAC;AACV,CAAuC;AAChC,IAAM,iBAAiB;",
-  "names": []
-}
