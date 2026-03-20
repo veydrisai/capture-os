@@ -23,6 +23,9 @@
 
 import { test, expect, request as newRequest } from "@playwright/test";
 
+// All tests in this file share module-level state (created IDs) — must run serially in one worker
+test.describe.configure({ mode: "serial" });
+
 const BASE = process.env.BASE_URL ?? "https://captureos.app";
 
 const created = {
