@@ -39,7 +39,7 @@ export const processInboundLead = task({
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM_EMAIL ?? "CaptureOS <onboarding@resend.dev>",
+        from: process.env.RESEND_FROM_EMAIL ?? "Michael @ RevenueCS <michael@revenuecs.com>",
         to: [internalEmail],
         subject: isCall
           ? `📅 Discovery call booked — ${escHtml(firstName)} ${escHtml(lastName ?? "")}`

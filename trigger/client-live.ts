@@ -7,7 +7,7 @@ import { escHtml } from "@/lib/html";
 async function sendEmail(to: string, subject: string, html: string) {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY env var is not set in Trigger.dev project settings");
-  const from = process.env.RESEND_FROM_EMAIL ?? "CaptureOS <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL ?? "Michael @ RevenueCS <michael@revenuecs.com>";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },

@@ -3,7 +3,7 @@ import { activities } from "@/drizzle/schema";
 import { requireUser } from "@/app/sessions.server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "CaptureOS <onboarding@resend.dev>";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "Michael @ RevenueCS <michael@revenuecs.com>";
 
 export async function action({ request }: { request: Request }) {
   if (request.method !== "POST") {
@@ -58,7 +58,7 @@ export async function action({ request }: { request: Request }) {
 
     const msg =
       isValidationError || errBody.includes("expected pattern") || errBody.includes("domain")
-        ? `FROM domain not verified in Resend. Go to resend.com/domains, verify your domain, then set RESEND_FROM_EMAIL=noreply@yourdomain.com in Render env vars. (Resend said: ${errBody})`
+        ? `Email delivery failed — Resend domain issue: ${errBody}. Check resend.com/domains to ensure revenuecs.com is still verified.`
         : `Email delivery failed: ${errBody}`;
 
     return Response.json({ error: msg }, { status: 502 });

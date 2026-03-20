@@ -6,9 +6,8 @@ import { escHtml } from "@/lib/html";
 async function sendEmail(to: string, subject: string, html: string) {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY env var is not set in Trigger.dev project settings");
-  // Use RESEND_FROM_EMAIL if set (must be a verified domain in Resend dashboard).
-  // Falls back to Resend's shared test address — works for account-owner email only.
-  const from = process.env.RESEND_FROM_EMAIL ?? "CaptureOS <onboarding@resend.dev>";
+  // Use RESEND_FROM_EMAIL env var if set, otherwise fall back to verified revenuecs.com sender.
+  const from = process.env.RESEND_FROM_EMAIL ?? "Michael @ RevenueCS <michael@revenuecs.com>";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
