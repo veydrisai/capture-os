@@ -35,9 +35,9 @@ const stageLabel: Record<string, string> = {
 };
 
 const stageColor: Record<string, string> = {
-  cold_outreach: "#818cf8", demo_booked: "#06b6d4", demo_done: "#a78bfa",
-  proposal_sent: "#f59e0b", agreement_signed: "#10b981", onboarding: "#22c55e",
-  live: "#4ade80", upsell: "#f97316", lost: "#ef4444",
+  cold_outreach: "#A78BFA", demo_booked: "#C084FC", demo_done: "#A855F7",
+  proposal_sent: "#D4AF6E", agreement_signed: "#10b981", onboarding: "#22c55e",
+  live: "#4ade80", upsell: "#E2B96A", lost: "#ef4444",
 };
 
 const activityIcon: Record<string, string> = {
@@ -46,10 +46,10 @@ const activityIcon: Record<string, string> = {
 
 export default function DashboardClient({ firstName, stats, greeting }: { firstName: string; stats: Stats; greeting: string }) {
   const kpis = [
-    { label: "Demos Booked",       sublabel: "this week",     value: stats.demosBooked.toString(),        icon: Calendar,   color: "#06b6d4", glow: "rgba(6,182,212,0.3)",   bg: "rgba(6,182,212,0.12)" },
-    { label: "Agreements Signed",  sublabel: "this month",    value: stats.agreementsSigned.toString(),   icon: FileCheck,  color: "#10b981", glow: "rgba(16,185,129,0.3)",  bg: "rgba(16,185,129,0.12)" },
-    { label: "Clients Live",       sublabel: "total active",  value: stats.clientsLive.toString(),        icon: Users2,     color: "#4ade80", glow: "rgba(74,222,128,0.3)",  bg: "rgba(74,222,128,0.12)" },
-    { label: "MRR",                sublabel: "from live clients", value: `$${stats.mrr.toLocaleString()}`, icon: DollarSign, color: "#a78bfa", glow: "rgba(139,92,246,0.3)",  bg: "rgba(139,92,246,0.12)" },
+    { label: "Demos Booked",       sublabel: "this week",     value: stats.demosBooked.toString(),        icon: Calendar,   color: "#A855F7", glow: "rgba(168,85,247,0.32)",  bg: "rgba(168,85,247,0.12)" },
+    { label: "Agreements Signed",  sublabel: "this month",    value: stats.agreementsSigned.toString(),   icon: FileCheck,  color: "#10b981", glow: "rgba(16,185,129,0.3)",   bg: "rgba(16,185,129,0.12)" },
+    { label: "Clients Live",       sublabel: "total active",  value: stats.clientsLive.toString(),        icon: Users2,     color: "#D4AF6E", glow: "rgba(212,175,110,0.32)", bg: "rgba(212,175,110,0.10)" },
+    { label: "MRR",                sublabel: "from live clients", value: `$${stats.mrr.toLocaleString()}`, icon: DollarSign, color: "#C084FC", glow: "rgba(192,132,252,0.32)", bg: "rgba(192,132,252,0.12)" },
   ];
 
   return (
@@ -83,10 +83,10 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
       {stats.pipelineValue > 0 && (
         <div className="glass-sm" style={{ padding: "12px 18px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <TrendingUp size={14} color="#818cf8" />
+            <TrendingUp size={14} color="#A855F7" />
             <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }}>Total pipeline value (excl. lost)</span>
           </div>
-          <span style={{ fontSize: 16, fontWeight: 700, color: "#818cf8" }}>${stats.pipelineValue.toLocaleString()}</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#C084FC" }}>${stats.pipelineValue.toLocaleString()}</span>
         </div>
       )}
 
@@ -94,7 +94,7 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
         <div className="glass" style={{ padding: 22 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h2 style={{ fontSize: 13.5, fontWeight: 600, color: "white" }}>Active Pipeline</h2>
-            <Link to="/deals" prefetch="intent" style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(99,102,241,0.85)", textDecoration: "none", fontWeight: 500 }}>
+            <Link to="/deals" prefetch="intent" style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(168,85,247,0.90)", textDecoration: "none", fontWeight: 500 }}>
               View all <ArrowUpRight size={11} />
             </Link>
           </div>
@@ -127,7 +127,7 @@ export default function DashboardClient({ firstName, stats, greeting }: { firstN
         <div className="glass" style={{ padding: 22 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h2 style={{ fontSize: 13.5, fontWeight: 600, color: "white" }}>Recent Activity</h2>
-            <Link to="/activity" prefetch="intent" style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(99,102,241,0.85)", textDecoration: "none", fontWeight: 500 }}>
+            <Link to="/activity" prefetch="intent" style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "rgba(168,85,247,0.90)", textDecoration: "none", fontWeight: 500 }}>
               View all <ArrowUpRight size={11} />
             </Link>
           </div>

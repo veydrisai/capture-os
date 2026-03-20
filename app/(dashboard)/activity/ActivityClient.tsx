@@ -13,7 +13,7 @@ interface Activity {
 }
 
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  note:    { icon: <FileText size={13} />,    color: "#a5b4fc", bg: "rgba(99,102,241,0.15)" },
+  note:    { icon: <FileText size={13} />,    color: "#a5b4fc", bg: "rgba(124,58,237,0.15)" },
   call:    { icon: <Phone size={13} />,       color: "#67e8f9", bg: "rgba(6,182,212,0.15)" },
   email:   { icon: <Mail size={13} />,        color: "#86efac", bg: "rgba(34,197,94,0.15)" },
   meeting: { icon: <Users size={13} />,       color: "#fcd34d", bg: "rgba(245,158,11,0.15)" },
@@ -61,7 +61,7 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
         >
           <Plus size={15} /> Log Activity
         </button>
@@ -141,14 +141,14 @@ export default function ActivityClient({ initialActivities }: { initialActivitie
               <div>
                 <label style={labelStyle}>Title <span style={{ color: "#f87171" }}>*</span></label>
                 <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} style={inputStyle}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.15)"; }}
                   onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Notes</label>
                 <textarea value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} rows={3} style={textareaStyle}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)"; }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.15)"; }}
                   onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
                 />
               </div>
@@ -170,9 +170,9 @@ const overlay: React.CSSProperties = { position: "fixed", inset: 0, background: 
 const panel: React.CSSProperties = { width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto", background: "#0f0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3)" };
 const modalHeader: React.CSSProperties = { padding: "24px 24px 0" };
 const modalTitle: React.CSSProperties = { fontSize: 20, fontWeight: 700, color: "white", letterSpacing: "-0.03em", marginBottom: 3 };
-const modalSubtitle: React.CSSProperties = { fontSize: 12, color: "rgba(99,102,241,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
+const modalSubtitle: React.CSSProperties = { fontSize: 12, color: "rgba(124,58,237,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
 const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 };
 const inputStyle: React.CSSProperties = { width: "100%", padding: "11px 14px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "white", fontSize: 14, fontFamily: "inherit", outline: "none", transition: "border-color 0.15s ease, box-shadow 0.15s ease" };
 const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical", lineHeight: 1.6 };
 const cancelBtn: React.CSSProperties = { flex: 1, padding: "10px 16px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
-const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.35)" };
+const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.35)" };

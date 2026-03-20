@@ -78,14 +78,14 @@ export default function SettingsPage() {
             {user?.image ? (
               <img src={user.image} alt={user.name ?? ""} style={{ width: 56, height: 56, borderRadius: "50%" }} />
             ) : (
-              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 600, color: "white" }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 600, color: "white" }}>
                 {(user?.name ?? user?.email ?? "?")[0].toUpperCase()}
               </div>
             )}
             <div>
               <p style={{ fontSize: 15, fontWeight: 500, color: "white" }}>{user?.name}</p>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>{user?.email}</p>
-              <span style={{ fontSize: 11, color: "#a5b4fc", background: "rgba(99,102,241,0.12)", padding: "2px 8px", borderRadius: 6, marginTop: 4, display: "inline-block" }}>
+              <span style={{ fontSize: 11, color: "#a5b4fc", background: "rgba(124,58,237,0.12)", padding: "2px 8px", borderRadius: 6, marginTop: 4, display: "inline-block" }}>
                 Admin
               </span>
             </div>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}
+                style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}
               >
                 <Save size={13} /> {saving ? "Saving..." : "Save Settings"}
               </button>
@@ -198,7 +198,7 @@ function SettingField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         style={{ width: "100%", padding: "9px 12px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
+        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)")}
         onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
       />
     </div>

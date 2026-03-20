@@ -55,7 +55,7 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
         </div>
         <button
           onClick={() => { setEditing(null); setModalOpen(true); }}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
         >
           <Plus size={15} /> Add Contact
         </button>
@@ -101,7 +101,7 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
               >
                 <td style={{ padding: "12px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "white", flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "white", flexShrink: 0 }}>
                       {contact.firstName[0]}{contact.lastName[0]}
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 500, color: "white" }}>{contact.firstName} {contact.lastName}</span>

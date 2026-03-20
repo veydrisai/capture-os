@@ -27,7 +27,7 @@ interface Deal {
 }
 
 const STAGES = [
-  { key: "cold_outreach",    label: "Cold Outreach",    color: "#818cf8" },
+  { key: "cold_outreach",    label: "Cold Outreach",    color: "#A78BFA" },
   { key: "demo_booked",      label: "Demo Booked",      color: "#06b6d4" },
   { key: "demo_done",        label: "Demo Done",        color: "#a78bfa" },
   { key: "proposal_sent",    label: "Proposal Sent",    color: "#f59e0b" },
@@ -42,7 +42,7 @@ const systemTypeLabel: Record<string, string> = {
   reactivation: "Reactivation", hot_lead: "Hot Lead", backend: "Backend", combo: "Combo",
 };
 const systemTypeColor: Record<string, string> = {
-  reactivation: "rgba(139,92,246,0.9)", hot_lead: "rgba(239,68,68,0.9)",
+  reactivation: "rgba(168,85,247,0.9)", hot_lead: "rgba(239,68,68,0.9)",
   backend: "rgba(6,182,212,0.9)", combo: "rgba(245,158,11,0.9)",
 };
 
@@ -87,7 +87,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
   const viewToggle = (
     <div style={{ display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, padding: 3 }}>
       {(["board", "list"] as const).map((v) => (
-        <button key={v} onClick={() => setView(v)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: view === v ? "rgba(99,102,241,0.25)" : "transparent", color: view === v ? "white" : "rgba(255,255,255,0.35)", cursor: "pointer", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
+        <button key={v} onClick={() => setView(v)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: view === v ? "rgba(124,58,237,0.25)" : "transparent", color: view === v ? "white" : "rgba(255,255,255,0.35)", cursor: "pointer", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
           {v === "board" ? <Columns size={14} /> : <List size={14} />}
         </button>
       ))}
@@ -107,7 +107,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
       actions={
         <>
           {viewToggle}
-          <button onClick={openNew} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.3)" }}>
+          <button onClick={openNew} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
             <Plus size={15} /> New Deal
           </button>
         </>
@@ -157,7 +157,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
                       key={deal.id}
                       onClick={() => openEdit(deal)}
                       style={{ padding: "12px 13px 10px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", cursor: "pointer", transition: "all 0.15s ease" }}
-                      onMouseEnter={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.background = "rgba(255,255,255,0.07)"; el.style.borderColor = "rgba(99,102,241,0.3)"; el.style.transform = "translateY(-1px)"; }}
+                      onMouseEnter={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.background = "rgba(255,255,255,0.07)"; el.style.borderColor = "rgba(124,58,237,0.3)"; el.style.transform = "translateY(-1px)"; }}
                       onMouseLeave={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.background = "rgba(255,255,255,0.04)"; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.transform = "translateY(0)"; }}
                     >
                       <p style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 5, lineHeight: 1.35, letterSpacing: "-0.01em" }}>{deal.title}</p>
@@ -236,7 +236,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
                       {deal.probability > 0 ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <div style={{ width: 48, height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 4, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${deal.probability}%`, background: stage?.color ?? "#6366f1", borderRadius: 4 }} />
+                            <div style={{ height: "100%", width: `${deal.probability}%`, background: stage?.color ?? "#7C3AED", borderRadius: 4 }} />
                           </div>
                           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{deal.probability}%</span>
                         </div>

@@ -110,7 +110,7 @@ export default function CalendarClient() {
         href="https://app.cal.com/bookings/upcoming"
         target="_blank"
         rel="noopener noreferrer"
-        style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", fontSize: 13, fontWeight: 500, textDecoration: "none" }}
+        style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "white", fontSize: 13, fontWeight: 500, textDecoration: "none" }}
       >
         <ExternalLink size={14} /> Cal.com
       </a>
@@ -154,14 +154,14 @@ export default function CalendarClient() {
                     padding: "8px 10px",
                     borderRight: (i + 1) % 7 !== 0 ? "1px solid rgba(255,255,255,0.04)" : "none",
                     borderBottom: i < days.length - 7 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                    background: isSelected ? "rgba(99,102,241,0.08)" : "transparent",
+                    background: isSelected ? "rgba(124,58,237,0.08)" : "transparent",
                     cursor: "pointer",
                     transition: "background 0.1s",
                   }}
                   onMouseEnter={(e) => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.03)"; }}
                   onMouseLeave={(e) => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                 >
-                  <div style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: today ? 600 : 400, color: today ? "white" : inMonth ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)", background: today ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "transparent", marginBottom: 4 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: today ? 600 : 400, color: today ? "white" : inMonth ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)", background: today ? "linear-gradient(135deg, #7C3AED, #A855F7)" : "transparent", marginBottom: 4 }}>
                     {format(day, "d")}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
