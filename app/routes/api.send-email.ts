@@ -46,17 +46,22 @@ export async function action({ request }: { request: Request }) {
 
   if (!res.ok) {
     let errBody = "";
+    let isValidationError = false;
     try {
       const errJson = await res.json();
       errBody = errJson?.message ?? errJson?.name ?? JSON.stringify(errJson);
+      isValidationError = errJson?.name === "validation_error" || res.status === 422;
     } catch {
       errBody = await res.text().catch(() => `HTTP ${res.status}`);
     }
     console.error("[send-email] Resend API error:", res.status, errBody);
-    return Response.json(
-      { error: `Email delivery failed: ${errBody}` },
-      { status: 502 },
-    );
+
+    const msg =
+      isValidationError || errBody.includes("expected pattern") || errBody.includes("domain")
+        ? `FROM domain not verified in Resend. Go to resend.com/domains, verify your domain, then set RESEND_FROM_EMAIL=noreply@yourdomain.com in Render env vars. (Resend said: ${errBody})`
+        : `Email delivery failed: ${errBody}`;
+
+    return Response.json({ error: msg }, { status: 502 });
   }
 
   const result = await res.json();

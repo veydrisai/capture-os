@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Search, Mail, Phone, MoreHorizontal, User, Send } from "lucide-react";
+import { Plus, Search, Mail, Phone, MoreHorizontal, User, Send, Trash2, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ContactModal from "@/components/crm/ContactModal";
 import SendEmailModal from "@/components/crm/SendEmailModal";
@@ -30,6 +30,23 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
   const [emailTarget, setEmailTarget] = useState<Contact | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  function toggleSelect(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  }
+
+  function toggleAll() {
+    setSelected(selected.size === filtered.length ? new Set() : new Set(filtered.map((c) => c.id)));
+  }
+
+  async function bulkDelete() {
+    if (!confirm(`Delete ${selected.size} contact${selected.size > 1 ? "s" : ""}? This cannot be undone.`)) return;
+    await Promise.all(Array.from(selected).map((id) => fetch(`/api/contacts/${id}`, { method: "DELETE" }).catch(() => {})));
+    setSelected(new Set());
+    load();
+  }
 
   async function load() {
     const res = await fetch("/api/contacts");
@@ -75,6 +92,9 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <th style={{ padding: "12px 12px 12px 16px", width: 36 }}>
+                <input type="checkbox" checked={filtered.length > 0 && selected.size === filtered.length} onChange={toggleAll} style={{ accentColor: "#22C55E", width: 14, height: 14, cursor: "pointer" }} />
+              </th>
               {["Name", "Company", "Email", "Phone", "Title", "Type", "Added", ""].map((h) => (
                 <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.35)", letterSpacing: "0.05em", textTransform: "uppercase" }}>{h}</th>
               ))}
@@ -83,7 +103,7 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} style={{ padding: 48, textAlign: "center" }}>
+                <td colSpan={9} style={{ padding: 48, textAlign: "center" }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                     <User size={28} color="rgba(255,255,255,0.15)" />
                     <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 13 }}>
@@ -92,13 +112,18 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
                   </div>
                 </td>
               </tr>
-            ) : filtered.map((contact, i) => (
+            ) : filtered.map((contact, i) => {
+              const isSelected = selected.has(contact.id);
+              return (
               <tr
                 key={contact.id}
                 className="row-hover"
                 onClick={() => { setEditing(contact); setModalOpen(true); }}
-                style={{ borderBottom: i < filtered.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", cursor: "pointer" }}
+                style={{ borderBottom: i < filtered.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", cursor: "pointer", background: isSelected ? "rgba(22,163,74,0.07)" : undefined }}
               >
+                <td style={{ padding: "12px 12px 12px 16px" }} onClick={(e) => toggleSelect(contact.id, e)}>
+                  <input type="checkbox" checked={isSelected} onChange={() => {}} style={{ accentColor: "#22C55E", width: 14, height: 14, cursor: "pointer" }} />
+                </td>
                 <td style={{ padding: "12px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #16A34A, #22C55E)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "white", flexShrink: 0 }}>
@@ -146,10 +171,25 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {/* ══ BULK ACTION BAR ══ */}
+      {selected.size > 0 && (
+        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: "rgba(10,18,8,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(34,197,94,0.35)", borderRadius: 16, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 8px 40px rgba(0,0,0,0.55)", zIndex: 200 }}>
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>{selected.size} selected</span>
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.12)" }} />
+          <button onClick={bulkDelete} style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
+            <Trash2 size={12} /> Delete
+          </button>
+          <button onClick={() => setSelected(new Set())} style={{ display: "flex", alignItems: "center", padding: "6px", borderRadius: 8, background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer" }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {modalOpen && (
         <ContactModal

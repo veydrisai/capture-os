@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Search, Check, Circle } from "lucide-react";
+import { Plus, Search, Check, Circle, Trash2, X } from "lucide-react";
 import ClientModal from "@/components/crm/ClientModal";
 
 interface Client {
@@ -59,6 +59,19 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  function toggleSelect(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  }
+
+  async function bulkDelete() {
+    if (!confirm(`Delete ${selected.size} client${selected.size > 1 ? "s" : ""}? This cannot be undone.`)) return;
+    await Promise.all(Array.from(selected).map((id) => fetch(`/api/clients/${id}`, { method: "DELETE" }).catch(() => {})));
+    setSelected(new Set());
+    load();
+  }
 
   async function load() {
     try {
@@ -109,9 +122,13 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
             const done = CHECKLIST_KEYS.filter((k) => client[k as keyof Client]).length;
             const pct = Math.round((done / CHECKLIST_KEYS.length) * 100);
             const st = statusColor[client.onboardingStatus] ?? statusColor.pending;
+            const isSelected = selected.has(client.id);
             return (
-              <div key={client.id} className="glass card-hover" onClick={() => { setEditing(client); setModalOpen(true); }} style={{ padding: "18px 22px", cursor: "pointer" }}>
+              <div key={client.id} className="glass card-hover" onClick={() => { setEditing(client); setModalOpen(true); }} style={{ padding: "18px 22px", cursor: "pointer", border: isSelected ? "1px solid rgba(34,197,94,0.4)" : undefined, background: isSelected ? "rgba(22,163,74,0.06)" : undefined }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+                  <div style={{ paddingTop: 2, flexShrink: 0 }} onClick={(e) => toggleSelect(client.id, e)}>
+                    <input type="checkbox" checked={isSelected} onChange={() => {}} style={{ accentColor: "#22C55E", width: 14, height: 14, cursor: "pointer" }} />
+                  </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                       <h3 style={{ fontSize: 15, fontWeight: 600, color: "white", letterSpacing: "-0.02em" }}>{client.businessName}</h3>
@@ -155,6 +172,20 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ══ BULK ACTION BAR ══ */}
+      {selected.size > 0 && (
+        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: "rgba(10,18,8,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(34,197,94,0.35)", borderRadius: 16, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 8px 40px rgba(0,0,0,0.55)", zIndex: 200 }}>
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>{selected.size} selected</span>
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.12)" }} />
+          <button onClick={bulkDelete} style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
+            <Trash2 size={12} /> Delete
+          </button>
+          <button onClick={() => setSelected(new Set())} style={{ display: "flex", alignItems: "center", padding: "6px", borderRadius: 8, background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer" }}>
+            <X size={14} />
+          </button>
         </div>
       )}
 
