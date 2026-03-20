@@ -181,11 +181,11 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
                 onClick={() => fileRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-                style={{ border: "2px dashed rgba(124,58,237,0.3)", borderRadius: 16, padding: "48px 32px", textAlign: "center", cursor: "pointer", background: "rgba(124,58,237,0.04)", transition: "all 0.15s" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(124,58,237,0.6)"; (e.currentTarget as HTMLDivElement).style.background = "rgba(124,58,237,0.08)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(124,58,237,0.3)"; (e.currentTarget as HTMLDivElement).style.background = "rgba(124,58,237,0.04)"; }}
+                style={{ border: "2px dashed rgba(22,163,74,0.3)", borderRadius: 16, padding: "48px 32px", textAlign: "center", cursor: "pointer", background: "rgba(22,163,74,0.04)", transition: "all 0.15s" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(22,163,74,0.6)"; (e.currentTarget as HTMLDivElement).style.background = "rgba(22,163,74,0.08)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(22,163,74,0.3)"; (e.currentTarget as HTMLDivElement).style.background = "rgba(22,163,74,0.04)"; }}
               >
-                <Upload size={28} color="rgba(124,58,237,0.6)" style={{ margin: "0 auto 12px" }} />
+                <Upload size={28} color="rgba(22,163,74,0.6)" style={{ margin: "0 auto 12px" }} />
                 <p style={{ color: "white", fontWeight: 500, fontSize: 14, marginBottom: 6 }}>Drop your CSV here or click to browse</p>
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>Accepts .csv files. Any column order works.</p>
                 <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
@@ -195,7 +195,7 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
                 <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Recognized column names</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {["First Name", "Last Name", "Email", "Phone", "Company", "Industry", "Source", "System Interest", "Estimated Value", "Notes"].map((h) => (
-                    <span key={h} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, background: "rgba(124,58,237,0.12)", color: "rgba(167,139,250,0.8)", border: "1px solid rgba(124,58,237,0.2)" }}>{h}</span>
+                    <span key={h} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, background: "rgba(22,163,74,0.12)", color: "rgba(74,222,128,0.8)", border: "1px solid rgba(22,163,74,0.2)" }}>{h}</span>
                   ))}
                 </div>
                 <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 10 }}>Variations like <code style={{ color: "rgba(255,255,255,0.4)" }}>first_name</code>, <code style={{ color: "rgba(255,255,255,0.4)" }}>FirstName</code>, <code style={{ color: "rgba(255,255,255,0.4)" }}>mobile</code> etc. are all auto-mapped.</p>
@@ -247,7 +247,7 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
           {/* STEP: Importing */}
           {step === "importing" && (
             <div style={{ padding: "48px 24px", textAlign: "center" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3px solid rgba(124,58,237,0.2)", borderTopColor: "#7C3AED", animation: "spin 0.7s linear infinite", margin: "0 auto 20px" }} />
+              <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3px solid rgba(22,163,74,0.2)", borderTopColor: "#16A34A", animation: "spin 0.7s linear infinite", margin: "0 auto 20px" }} />
               <p style={{ color: "white", fontWeight: 600, fontSize: 15, marginBottom: 6 }}>
                 Importing {parsedLeads.length.toLocaleString()} leads...
               </p>
@@ -259,7 +259,7 @@ export default function LeadImportModal({ onClose, onImported }: Props) {
                 <div style={{
                   height: "100%",
                   borderRadius: 999,
-                  background: "linear-gradient(90deg, #7C3AED, #A855F7)",
+                  background: "linear-gradient(90deg, #16A34A, #22C55E)",
                   width: `${batchProgress.total > 0 ? Math.round((batchProgress.done / batchProgress.total) * 100) : 0}%`,
                   transition: "width 0.3s ease",
                 }} />
@@ -310,9 +310,9 @@ const headerStyle: React.CSSProperties = { flexShrink: 0, display: "flex", align
 const bodyStyle: React.CSSProperties = { flex: 1, overflowY: "auto", padding: "24px 28px" };
 const footerStyle: React.CSSProperties = { flexShrink: 0, display: "flex", gap: 10, padding: "16px 28px", borderTop: "1px solid rgba(255,255,255,0.07)" };
 const titleStyle: React.CSSProperties = { fontSize: 20, fontWeight: 700, color: "white", letterSpacing: "-0.03em", marginBottom: 3 };
-const subtitleStyle: React.CSSProperties = { fontSize: 12, color: "rgba(124,58,237,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
+const subtitleStyle: React.CSSProperties = { fontSize: 12, color: "rgba(22,163,74,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
 const closeBtn: React.CSSProperties = { background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, marginTop: -2 };
 const tdStyle: React.CSSProperties = { padding: "9px 12px", fontSize: 12.5, color: "rgba(255,255,255,0.75)" };
 const cancelBtn: React.CSSProperties = { flex: 1, padding: "10px 16px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
-const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.35)" };
+const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #16A34A, #22C55E)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(22,163,74,0.35)" };
 const errorStyle: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 10, marginTop: 14 };

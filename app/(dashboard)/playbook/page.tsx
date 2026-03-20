@@ -6,9 +6,9 @@ const PLAYS = [
   {
     id: "A",
     title: "Play A — Cold Outreach (Reactivation)",
-    color: "#A78BFA",
-    gradient: "linear-gradient(135deg, rgba(124,58,237,0.25), rgba(168,85,247,0.15))",
-    border: "rgba(124,58,237,0.3)",
+    color: "#4ADE80",
+    gradient: "linear-gradient(135deg, rgba(22,163,74,0.25), rgba(34,197,94,0.15))",
+    border: "rgba(22,163,74,0.3)",
     system: "Reactivation System",
     goal: "Book demos from dormant/cold prospect lists using AI voice.",
     steps: [
@@ -189,8 +189,8 @@ export default function PlaybookPage() {
                         <p key={kpi} style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.8 }}>· {kpi}</p>
                       ))}
                     </div>
-                    <div style={{ padding: "12px 14px", borderRadius: 10, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", minWidth: 200 }}>
-                      <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(124,58,237,0.6)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Make.com Webhook</p>
+                    <div style={{ padding: "12px 14px", borderRadius: 10, background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", minWidth: 200 }}>
+                      <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(22,163,74,0.6)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Make.com Webhook</p>
                       <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>{play.makeWebhook}</p>
                     </div>
                   </div>

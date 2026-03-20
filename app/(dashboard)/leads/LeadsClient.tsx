@@ -35,7 +35,7 @@ interface Lead {
 }
 
 const STAGES = [
-  { key: "new",            label: "New",            color: "#A78BFA" },
+  { key: "new",            label: "New",            color: "#4ADE80" },
   { key: "contacted",      label: "Contacted",      color: "#06b6d4" },
   { key: "interested",     label: "Interested",     color: "#a78bfa" },
   { key: "demo_scheduled", label: "Demo Scheduled", color: "#f59e0b" },
@@ -48,7 +48,7 @@ const STAGES = [
 const statusPill: Record<string, { bg: string; color: string; border: string }> = {
   new:            { bg: "rgba(129,140,248,0.12)", color: "#c7d2fe", border: "rgba(129,140,248,0.25)" },
   contacted:      { bg: "rgba(6,182,212,0.12)",   color: "#a5f3fc", border: "rgba(6,182,212,0.25)" },
-  interested:     { bg: "rgba(167,139,250,0.12)", color: "#ddd6fe", border: "rgba(167,139,250,0.25)" },
+  interested:     { bg: "rgba(74,222,128,0.12)", color: "#ddd6fe", border: "rgba(74,222,128,0.25)" },
   demo_scheduled: { bg: "rgba(245,158,11,0.12)",  color: "#fde68a", border: "rgba(245,158,11,0.25)" },
   no_show:        { bg: "rgba(249,115,22,0.12)",  color: "#fed7aa", border: "rgba(249,115,22,0.25)" },
   not_qualified:  { bg: "rgba(107,114,128,0.12)", color: "#d1d5db", border: "rgba(107,114,128,0.25)" },
@@ -76,8 +76,8 @@ function DraggableCard({ lead, stageColor, onClick }: { lead: Lead; stageColor: 
       style={{
         padding: "12px 13px 10px",
         borderRadius: 12,
-        background: isDragging ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.04)",
-        border: isDragging ? "1px solid rgba(124,58,237,0.4)" : "1px solid rgba(255,255,255,0.07)",
+        background: isDragging ? "rgba(22,163,74,0.15)" : "rgba(255,255,255,0.04)",
+        border: isDragging ? "1px solid rgba(22,163,74,0.4)" : "1px solid rgba(255,255,255,0.07)",
         cursor: isDragging ? "grabbing" : "grab",
         opacity: isDragging ? 0.4 : 1,
         transition: "background 0.15s, border 0.15s",
@@ -87,7 +87,7 @@ function DraggableCard({ lead, stageColor, onClick }: { lead: Lead; stageColor: 
         if (isDragging) return;
         const el = e.currentTarget as HTMLDivElement;
         el.style.background = "rgba(255,255,255,0.07)";
-        el.style.borderColor = "rgba(124,58,237,0.3)";
+        el.style.borderColor = "rgba(22,163,74,0.3)";
       }}
       onMouseLeave={(e) => {
         if (isDragging) return;
@@ -109,7 +109,7 @@ function CardContent({ lead, stageColor }: { lead: Lead; stageColor: string }) {
       <p style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 3, lineHeight: 1.35, letterSpacing: "-0.01em" }}>{fullName(lead)}</p>
       {lead.company && <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginBottom: 5 }}>{lead.company}</p>}
       {lead.systemInterest && (
-        <span style={{ display: "inline-flex", fontSize: 10, fontWeight: 600, color: "rgba(167,139,250,0.85)", background: "rgba(168,85,247,0.1)", padding: "2px 7px", borderRadius: 6, border: "1px solid rgba(168,85,247,0.2)" }}>
+        <span style={{ display: "inline-flex", fontSize: 10, fontWeight: 600, color: "rgba(74,222,128,0.85)", background: "rgba(34,197,94,0.1)", padding: "2px 7px", borderRadius: 6, border: "1px solid rgba(34,197,94,0.2)" }}>
           {systemTypeLabel[lead.systemInterest]}
         </span>
       )}
@@ -132,8 +132,8 @@ function DroppableColumn({ stage, children, style }: { stage: typeof STAGES[numb
         ...style,
         display: "flex",
         flexDirection: "column",
-        background: isOver ? "rgba(124,58,237,0.08)" : "rgba(255,255,255,0.025)",
-        border: isOver ? "1px solid rgba(124,58,237,0.35)" : "1px solid rgba(255,255,255,0.07)",
+        background: isOver ? "rgba(22,163,74,0.08)" : "rgba(255,255,255,0.025)",
+        border: isOver ? "1px solid rgba(22,163,74,0.35)" : "1px solid rgba(255,255,255,0.07)",
         borderRadius: 16,
         overflow: "hidden",
         transition: "background 0.15s, border 0.15s",
@@ -214,7 +214,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
   const viewToggle = (
     <div style={{ display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, padding: 3 }}>
       {(["kanban", "list"] as const).map((v) => (
-        <button key={v} onClick={() => setView(v)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: view === v ? "rgba(124,58,237,0.25)" : "transparent", color: view === v ? "white" : "rgba(255,255,255,0.35)", cursor: "pointer", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
+        <button key={v} onClick={() => setView(v)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: view === v ? "rgba(22,163,74,0.25)" : "transparent", color: view === v ? "white" : "rgba(255,255,255,0.35)", cursor: "pointer", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
           {v === "kanban" ? <Columns size={14} /> : <List size={14} />}
         </button>
       ))}
@@ -237,7 +237,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
             <button onClick={() => setImportOpen(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
               <Upload size={15} /> Import CSV
             </button>
-            <button onClick={() => { setEditing(null); setModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
+            <button onClick={() => { setEditing(null); setModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 10, background: "linear-gradient(135deg, #16A34A, #22C55E)", border: "none", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(22,163,74,0.3)" }}>
               <Plus size={15} /> Add Lead
             </button>
           </>
@@ -317,8 +317,8 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
             {/* Drag ghost */}
             <DragOverlay dropAnimation={{ duration: 150, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
               {activeLead && (
-                <div style={{ padding: "12px 13px 10px", borderRadius: 12, background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.5)", boxShadow: "0 8px 32px rgba(124,58,237,0.3)", cursor: "grabbing", width: 220 }}>
-                  <CardContent lead={activeLead} stageColor={activeStage?.color ?? "#A78BFA"} />
+                <div style={{ padding: "12px 13px 10px", borderRadius: 12, background: "rgba(22,163,74,0.2)", border: "1px solid rgba(22,163,74,0.5)", boxShadow: "0 8px 32px rgba(22,163,74,0.3)", cursor: "grabbing", width: 220 }}>
+                  <CardContent lead={activeLead} stageColor={activeStage?.color ?? "#4ADE80"} />
                 </div>
               )}
             </DragOverlay>
@@ -354,10 +354,10 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
                       <td style={{ padding: "11px 16px" }}>
                         {pill ? <span style={{ display: "inline-flex", padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 500, background: pill.bg, color: pill.color, border: `1px solid ${pill.border}` }}>{lead.status.replace(/_/g, " ")}</span> : lead.status}
                       </td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: "rgba(167,139,250,0.85)" }}>{lead.systemInterest ? systemTypeLabel[lead.systemInterest] : "—"}</td>
+                      <td style={{ padding: "11px 16px", fontSize: 12, color: "rgba(74,222,128,0.85)" }}>{lead.systemInterest ? systemTypeLabel[lead.systemInterest] : "—"}</td>
                       <td style={{ padding: "11px 16px", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{lead.source ?? "—"}</td>
                       <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>{lead.estimatedValue > 0 ? `$${lead.estimatedValue.toLocaleString()}` : "—"}</td>
-                      <td style={{ padding: "11px 16px" }}><span style={{ fontSize: 12, color: "rgba(124,58,237,0.7)" }}>Edit →</span></td>
+                      <td style={{ padding: "11px 16px" }}><span style={{ fontSize: 12, color: "rgba(22,163,74,0.7)" }}>Edit →</span></td>
                     </tr>
                   );
                 })}

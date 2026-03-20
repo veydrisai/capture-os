@@ -70,7 +70,7 @@ export default function BoardViewport({
     paddingRight: 48,
     alignItems: "flex-start",
     scrollbarWidth: "thin",
-    scrollbarColor: "rgba(124,58,237,0.35) transparent",
+    scrollbarColor: "rgba(22,163,74,0.35) transparent",
   };
 
   return (

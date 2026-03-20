@@ -44,10 +44,10 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-            background: "linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)",
+            background: "linear-gradient(135deg, linear-gradient(135deg, #16A34A 0%, #22C55E 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 16px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.2)",
-            border: "1px solid rgba(168,85,247,0.35)",
+            boxShadow: "0 4px 16px rgba(22,163,74,0.45), inset 0 1px 0 rgba(255,255,255,0.2)",
+            border: "1px solid rgba(34,197,94,0.35)",
           }}>
             <img src="/logo.svg" alt="CaptureOS" style={{ width: 20, height: 20, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
           </div>
@@ -76,15 +76,15 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
               fontSize: 13.5, fontWeight: isActive ? 500 : 400,
               color: isActive ? "white" : "rgba(255,255,255,0.40)",
               background: isActive
-                ? "linear-gradient(135deg,rgba(124,58,237,0.28),rgba(168,85,247,0.16))"
+                ? "linear-gradient(135deg,rgba(22,163,74,0.28),rgba(34,197,94,0.16))"
                 : "transparent",
               border: isActive
-                ? "1px solid rgba(124,58,237,0.32)"
+                ? "1px solid rgba(22,163,74,0.32)"
                 : "1px solid transparent",
               textDecoration: "none",
               transition: "background 0.12s ease, color 0.12s ease",
               boxShadow: isActive
-                ? "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 10px rgba(124,58,237,0.18)"
+                ? "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 10px rgba(22,163,74,0.18)"
                 : "none",
             })}
             className="nav-link"
@@ -96,8 +96,8 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
                 {isActive && (
                   <span style={{
                     marginLeft: "auto", width: 5, height: 5, borderRadius: "50%",
-                    background: "#A855F7",
-                    boxShadow: "0 0 8px rgba(168,85,247,0.9)",
+                    background: "#22C55E",
+                    boxShadow: "0 0 8px rgba(34,197,94,0.9)",
                   }} />
                 )}
               </>
@@ -135,10 +135,10 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
           ) : (
             <div style={{
               width: 30, height: 30, borderRadius: "50%",
-              background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+              background: "linear-gradient(135deg,#16A34A,#22C55E)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 11, fontWeight: 600, color: "white", flexShrink: 0,
-              boxShadow: "0 2px 8px rgba(124,58,237,0.4)",
+              boxShadow: "0 2px 8px rgba(22,163,74,0.4)",
             }}>
               {initials(user?.name ?? user?.email ?? "?")}
             </div>

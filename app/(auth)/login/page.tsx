@@ -31,8 +31,8 @@ export default function LoginPage() {
               width: 56,
               height: 56,
               borderRadius: 18,
-              background: "linear-gradient(135deg, #7C3AED, #A855F7)",
-              boxShadow: "0 8px 32px rgba(124,58,237,0.5), inset 0 1px 0 rgba(255,255,255,0.25)",
+              background: "linear-gradient(135deg, #16A34A, #22C55E)",
+              boxShadow: "0 8px 32px rgba(22,163,74,0.5), inset 0 1px 0 rgba(255,255,255,0.25)",
               marginBottom: 20,
             }}
           >

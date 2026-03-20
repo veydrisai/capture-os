@@ -104,7 +104,7 @@ export default function LeadModal({ lead, onClose, onSaved }: Props) {
             <div>
               <label style={labelStyle}>Notes</label>
               <textarea value={form.notes} onChange={(e) => up("notes", e.target.value)} rows={3} style={textareaStyle}
-                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.15)"; }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(22,163,74,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(22,163,74,0.15)"; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
               />
             </div>
@@ -133,7 +133,7 @@ function Field({ label, value, onChange, type = "text", required }: { label: str
     <div>
       <label style={labelStyle}>{label}{required && <span style={{ color: "#f87171", marginLeft: 3 }}>*</span>}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} style={inputStyle}
-        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.15)"; }}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(22,163,74,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(22,163,74,0.15)"; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
       />
     </div>
@@ -145,7 +145,7 @@ function SelectF({ label, value, onChange, options }: { label: string; value: st
     <div>
       <label style={labelStyle}>{label}</label>
       <select value={value} onChange={(e) => onChange(e.target.value)} style={selectStyle}
-        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.15)"; }}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(22,163,74,0.7)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(22,163,74,0.15)"; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
       >
         {options.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
@@ -160,7 +160,7 @@ const headerStyle: React.CSSProperties = { flexShrink: 0, display: "flex", align
 const bodyStyle: React.CSSProperties = { flex: 1, overflowY: "auto", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 16 };
 const footerStyle: React.CSSProperties = { flexShrink: 0, display: "flex", gap: 10, padding: "16px 28px", borderTop: "1px solid rgba(255,255,255,0.07)" };
 const titleStyle: React.CSSProperties = { fontSize: 20, fontWeight: 700, color: "white", letterSpacing: "-0.03em", marginBottom: 3 };
-const subtitleStyle: React.CSSProperties = { fontSize: 12, color: "rgba(124,58,237,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
+const subtitleStyle: React.CSSProperties = { fontSize: 12, color: "rgba(22,163,74,0.7)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" };
 const closeBtn: React.CSSProperties = { background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, marginTop: -2 };
 const grid2: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 };
 const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 };
@@ -169,5 +169,5 @@ const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer", app
 const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical", lineHeight: 1.6 };
 const deleteBtn: React.CSSProperties = { padding: "10px 16px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", color: "#fca5a5", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
 const cancelBtn: React.CSSProperties = { flex: 1, padding: "10px 16px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" };
-const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.35)" };
+const saveBtn: React.CSSProperties = { flex: 2, padding: "10px 16px", borderRadius: 12, background: "linear-gradient(135deg, #16A34A, #22C55E)", border: "none", color: "white", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 14px rgba(22,163,74,0.35)" };
 const errorStyle: React.CSSProperties = { fontSize: 12, color: "#fca5a5", padding: "9px 12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 10 };

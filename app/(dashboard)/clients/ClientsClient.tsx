@@ -39,11 +39,11 @@ const CHECKLIST_KEYS = [
 
 const statusColor: Record<string, { color: string; bg: string; border: string }> = {
   pending:             { color: "#94a3b8", bg: "rgba(148,163,184,0.1)",  border: "rgba(148,163,184,0.2)" },
-  intake_sent:         { color: "#c7d2fe", bg: "rgba(124,58,237,0.12)", border: "rgba(124,58,237,0.25)" },
+  intake_sent:         { color: "#c7d2fe", bg: "rgba(22,163,74,0.12)", border: "rgba(22,163,74,0.25)" },
   intake_complete:     { color: "#a5f3fc", bg: "rgba(6,182,212,0.12)",  border: "rgba(6,182,212,0.25)" },
   compliance_review:   { color: "#fde68a", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)" },
   compliance_approved: { color: "#fed7aa", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.25)" },
-  building:            { color: "#ddd6fe", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.25)" },
+  building:            { color: "#ddd6fe", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.25)" },
   testing:             { color: "#fda4af", bg: "rgba(244,63,94,0.12)",  border: "rgba(244,63,94,0.25)" },
   soft_launch:         { color: "#bbf7d0", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.25)" },
   live:                { color: "#4ade80", bg: "rgba(74,222,128,0.15)", border: "rgba(74,222,128,0.35)" },
@@ -88,7 +88,7 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
             {clients.length} total · {liveClients.length} live · ${mrr.toLocaleString()}/mo MRR
           </p>
         </div>
-        <button onClick={() => { setEditing(null); setModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+        <button onClick={() => { setEditing(null); setModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, background: "linear-gradient(135deg, #16A34A, #22C55E)", border: "none", color: "white", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
           <Plus size={15} /> Add Client
         </button>
       </div>
@@ -115,12 +115,12 @@ export default function ClientsClient({ initialClients }: { initialClients: Clie
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                       <h3 style={{ fontSize: 15, fontWeight: 600, color: "white", letterSpacing: "-0.02em" }}>{client.businessName}</h3>
-                      {client.systemType && <span style={{ fontSize: 10.5, color: "rgba(167,139,250,0.85)", background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.2)", borderRadius: 6, padding: "1px 7px", fontWeight: 500 }}>{systemLabel[client.systemType]}</span>}
+                      {client.systemType && <span style={{ fontSize: 10.5, color: "rgba(74,222,128,0.85)", background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 6, padding: "1px 7px", fontWeight: 500 }}>{systemLabel[client.systemType]}</span>}
                       <span style={{ fontSize: 10.5, color: st.color, background: st.bg, border: `1px solid ${st.border}`, borderRadius: 6, padding: "1px 7px", fontWeight: 500 }}>{client.onboardingStatus.replace(/_/g, " ")}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                       <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 3 }}>
-                        <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? "#4ade80" : "linear-gradient(90deg,#7C3AED,#A855F7)", borderRadius: 3 }} />
+                        <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? "#4ade80" : "linear-gradient(90deg,#16A34A,#22C55E)", borderRadius: 3 }} />
                       </div>
                       <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", whiteSpace: "nowrap" }}>{done}/{CHECKLIST_KEYS.length} steps</span>
                     </div>
