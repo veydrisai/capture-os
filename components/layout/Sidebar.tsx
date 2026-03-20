@@ -44,7 +44,7 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-            background: "linear-gradient(135deg, linear-gradient(135deg, #16A34A 0%, #22C55E 100%)",
+            background: "linear-gradient(135deg, #16A34A 0%, #22C55E 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 4px 16px rgba(22,163,74,0.45), inset 0 1px 0 rgba(255,255,255,0.2)",
             border: "1px solid rgba(34,197,94,0.35)",

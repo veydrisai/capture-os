@@ -10,10 +10,16 @@ export async function action({ request }: { request: Request }) {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
-  const user = await requireUser(request);
+  // Return JSON 401 instead of redirect so fetch() callers get a proper response
+  let user: Awaited<ReturnType<typeof requireUser>>;
+  try {
+    user = await requireUser(request);
+  } catch {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   if (!RESEND_API_KEY) {
-    return Response.json({ error: "RESEND_API_KEY not configured" }, { status: 500 });
+    return Response.json({ error: "RESEND_API_KEY is not configured on the server" }, { status: 500 });
   }
 
   let body: { to: string; subject: string; html: string; contactId?: string };
@@ -39,21 +45,31 @@ export async function action({ request }: { request: Request }) {
   });
 
   if (!res.ok) {
-    const err = await res.text().catch(() => "");
-    return Response.json({ error: `Resend error: ${err}` }, { status: 502 });
+    let errBody = "";
+    try {
+      const errJson = await res.json();
+      errBody = errJson?.message ?? errJson?.name ?? JSON.stringify(errJson);
+    } catch {
+      errBody = await res.text().catch(() => `HTTP ${res.status}`);
+    }
+    console.error("[send-email] Resend API error:", res.status, errBody);
+    return Response.json(
+      { error: `Email delivery failed: ${errBody}` },
+      { status: 502 },
+    );
   }
 
   const result = await res.json();
 
-  // Log as activity
+  // Log as activity — non-blocking so a DB hiccup doesn't fail the send
   if (contactId) {
-    await db.insert(activities).values({
+    db.insert(activities).values({
       type: "email",
       title: subject,
       body: html.replace(/<[^>]+>/g, ""),
       contactId,
       createdBy: user.id,
-    });
+    }).catch((err) => console.error("[send-email] activity log failed:", err));
   }
 
   return Response.json({ ok: true, id: result.id });

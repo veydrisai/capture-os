@@ -31,20 +31,23 @@ export async function loader({ request }: { request: Request }) {
       db.select().from(activities).orderBy(sql`${activities.createdAt} DESC`).limit(8),
     ]);
 
-  return {
-    firstName: user.name.split(" ")[0] ?? "there",
-    greeting: getGreeting(),
-    stats: {
-      demosBooked: demosBooked.count,
-      demosDone: demosDone.count,
-      agreementsSigned: agreementsSigned.count,
-      clientsLive: clientsLive.count,
-      mrr: mrrResult.total ?? 0,
-      pipelineValue: pipelineValue.total ?? 0,
-      recentDeals,
-      recentActivities,
+  return Response.json(
+    {
+      firstName: user.name.split(" ")[0] ?? "there",
+      greeting: getGreeting(),
+      stats: {
+        demosBooked: demosBooked.count,
+        demosDone: demosDone.count,
+        agreementsSigned: agreementsSigned.count,
+        clientsLive: clientsLive.count,
+        mrr: mrrResult.total ?? 0,
+        pipelineValue: pipelineValue.total ?? 0,
+        recentDeals,
+        recentActivities,
+      },
     },
-  };
+    { headers: { "Cache-Control": "private, max-age=20, stale-while-revalidate=60" } },
+  );
 }
 
 export default function DashboardPage({ loaderData }: { loaderData: any }) {
