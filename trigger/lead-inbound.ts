@@ -39,7 +39,7 @@ export const processInboundLead = task({
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "CaptureOS <noreply@captureos.app>",
+        from: process.env.RESEND_FROM_EMAIL ?? "CaptureOS <onboarding@resend.dev>",
         to: [internalEmail],
         subject: isCall
           ? `📅 Discovery call booked — ${escHtml(firstName)} ${escHtml(lastName ?? "")}`
@@ -102,8 +102,13 @@ export const processInboundLead = task({
     });
 
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Resend error ${res.status}: ${text}`);
+      let detail = "";
+      try { const j = await res.json(); detail = j?.message ?? j?.name ?? JSON.stringify(j); }
+      catch { detail = await res.text().catch(() => `HTTP ${res.status}`); }
+      const hint = res.status === 422 || detail.includes("expected pattern") || detail.includes("domain")
+        ? " → Verify your domain at resend.com/domains and set RESEND_FROM_EMAIL in Trigger.dev env vars"
+        : "";
+      throw new Error(`Resend ${res.status}: ${detail}${hint}`);
     }
 
     return { ok: true, email };

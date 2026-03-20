@@ -5,20 +5,23 @@ import { escHtml } from "@/lib/html";
 
 async function sendEmail(to: string, subject: string, html: string) {
   const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error("RESEND_API_KEY not set");
+  if (!key) throw new Error("RESEND_API_KEY env var is not set in Trigger.dev project settings");
+  // Use RESEND_FROM_EMAIL if set (must be a verified domain in Resend dashboard).
+  // Falls back to Resend's shared test address — works for account-owner email only.
+  const from = process.env.RESEND_FROM_EMAIL ?? "CaptureOS <onboarding@resend.dev>";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: "Michael @ RevenueCS <michael@revenuecs.com>",
-      to: [to],
-      subject,
-      html,
-    }),
+    body: JSON.stringify({ from, to: [to], subject, html }),
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Resend error ${res.status}: ${text}`);
+    let detail = "";
+    try { const j = await res.json(); detail = j?.message ?? j?.name ?? JSON.stringify(j); }
+    catch { detail = await res.text().catch(() => `HTTP ${res.status}`); }
+    const hint = res.status === 422 || detail.includes("expected pattern") || detail.includes("domain")
+      ? " → Verify your domain at resend.com/domains and set RESEND_FROM_EMAIL=noreply@yourdomain.com in Trigger.dev env vars"
+      : "";
+    throw new Error(`Resend ${res.status}: ${detail}${hint}`);
   }
 }
 
