@@ -64,7 +64,7 @@ function fullName(l: Lead) { return `${l.firstName} ${l.lastName}`.trim(); }
 
 // ─── Draggable Card ───────────────────────────────────────────────────────────
 
-function DraggableCard({ lead, stageColor, onClick }: { lead: Lead; stageColor: string; onClick: () => void }) {
+function DraggableCard({ lead, stageColor, onClick, isSelected, onSelect }: { lead: Lead; stageColor: string; onClick: () => void; isSelected: boolean; onSelect: (e: React.MouseEvent) => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
 
   return (
@@ -74,10 +74,11 @@ function DraggableCard({ lead, stageColor, onClick }: { lead: Lead; stageColor: 
       {...attributes}
       onClick={onClick}
       style={{
+        position: "relative",
         padding: "12px 13px 10px",
         borderRadius: 12,
-        background: isDragging ? "rgba(22,163,74,0.15)" : "rgba(255,255,255,0.04)",
-        border: isDragging ? "1px solid rgba(22,163,74,0.4)" : "1px solid rgba(255,255,255,0.07)",
+        background: isSelected ? "rgba(22,163,74,0.12)" : isDragging ? "rgba(22,163,74,0.15)" : "rgba(255,255,255,0.04)",
+        border: isSelected ? "1px solid rgba(22,163,74,0.45)" : isDragging ? "1px solid rgba(22,163,74,0.4)" : "1px solid rgba(255,255,255,0.07)",
         cursor: isDragging ? "grabbing" : "grab",
         opacity: isDragging ? 0.4 : 1,
         transition: "background 0.15s, border 0.15s",
@@ -86,16 +87,27 @@ function DraggableCard({ lead, stageColor, onClick }: { lead: Lead; stageColor: 
       onMouseEnter={(e) => {
         if (isDragging) return;
         const el = e.currentTarget as HTMLDivElement;
-        el.style.background = "rgba(255,255,255,0.07)";
-        el.style.borderColor = "rgba(22,163,74,0.3)";
+        if (!isSelected) { el.style.background = "rgba(255,255,255,0.07)"; el.style.borderColor = "rgba(22,163,74,0.3)"; }
       }}
       onMouseLeave={(e) => {
         if (isDragging) return;
         const el = e.currentTarget as HTMLDivElement;
-        el.style.background = "rgba(255,255,255,0.04)";
-        el.style.borderColor = "rgba(255,255,255,0.07)";
+        if (!isSelected) { el.style.background = "rgba(255,255,255,0.04)"; el.style.borderColor = "rgba(255,255,255,0.07)"; }
       }}
     >
+      {/* Checkbox — stops drag listeners via stopPropagation */}
+      <div
+        style={{ position: "absolute", top: 8, right: 8 }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={onSelect}
+      >
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => {}}
+          style={{ accentColor: "#22C55E", width: 13, height: 13, cursor: "pointer" }}
+        />
+      </div>
       <CardContent lead={lead} stageColor={stageColor} />
     </div>
   );
@@ -331,6 +343,8 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
                             lead={lead}
                             stageColor={stage.color}
                             onClick={() => { setEditing(lead); setModalOpen(true); }}
+                            isSelected={selected.has(lead.id)}
+                            onSelect={(e) => toggleSelect(lead.id, e)}
                           />
                         ))}
 
