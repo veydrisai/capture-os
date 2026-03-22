@@ -757,4 +757,44 @@ main > .outlet-wrap > .animate-fade-up:first-child {
   .bg-scene::after  { animation-duration: 150s; }
   .bg-orb-3         { animation-duration: 100s; }
   .bg-orb-4         { animation-duration: 130s; }
+
+  /* ─── Mobile card-table: transforms table rows into stacked cards ── */
+  .mobile-card-table { min-width: unset !important; width: 100%; }
+  .mobile-card-table thead { display: none; }
+  .mobile-card-table tbody tr {
+    display: block;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+  }
+  .mobile-card-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border: none;
+    font-size: 13px;
+  }
+  .mobile-card-table td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Safe-area padding for fixed bottom bulk-action bars */
+  .bulk-action-bar-fixed {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ─── Small mobile font scaling (≤480px) ────────────────────────────────── */
+
+@media (max-width: 480px) {
+  body { font-size: clamp(13px, 3.5vw, 16px); }
 }

@@ -72,7 +72,7 @@ export default function Sidebar({ user, isOpen = false, onClose }: SidebarProps)
             onClick={onClose}
             style={({ isActive }) => ({
               display: "flex", alignItems: "center", gap: 9,
-              padding: "9px 12px", borderRadius: 11,
+              padding: "9px 12px", borderRadius: 11, minHeight: 44,
               fontSize: 13.5, fontWeight: isActive ? 500 : 400,
               color: isActive ? "white" : "rgba(255,255,255,0.40)",
               background: isActive

@@ -292,7 +292,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
         toolbar={
           <div style={{ position: "relative" }}>
             <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, company, email..." style={{ width: "100%", maxWidth: 400, padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, company, email..." style={{ width: "100%", maxWidth: "100%", padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
           </div>
         }
       >
@@ -312,7 +312,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
             }}
           >
             <div ref={boardRef}>
-              <BoardViewport columnCount={STAGES.length} minColWidth={240} maxColWidth={320}>
+              <BoardViewport columnCount={STAGES.length} minColWidth={200} maxColWidth={320}>
                 {STAGES.map((stage) => {
                   const stageLeads = filtered.filter((l) => l.status === stage.key);
                   return (
@@ -377,7 +377,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
         {/* ══ LIST VIEW ══ */}
         {view === "list" && (
           <div className="glass" style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 660 }}>
+            <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", minWidth: 660 }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                   <th style={{ padding: "11px 12px 11px 16px", width: 36 }}>
@@ -405,7 +405,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
                       onMouseEnter={(e) => { if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = "rgba(255,255,255,0.03)"; }}
                       onMouseLeave={(e) => { if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = "transparent"; }}
                     >
-                      <td style={{ padding: "11px 12px 11px 16px" }} onClick={(e) => toggleSelect(lead.id, e)}>
+                      <td data-label="" style={{ padding: "11px 12px 11px 16px" }} onClick={(e) => toggleSelect(lead.id, e)}>
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -413,18 +413,18 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
                           style={{ accentColor: "#22C55E", width: 14, height: 14, cursor: "pointer" }}
                         />
                       </td>
-                      <td style={{ padding: "11px 16px" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>
+                      <td data-label="Name" style={{ padding: "11px 16px" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>
                         <p style={{ fontSize: 13, fontWeight: 600, color: "white", letterSpacing: "-0.01em" }}>{fullName(lead)}</p>
                         {lead.email && <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 1 }}>{lead.email}</p>}
                       </td>
-                      <td style={{ padding: "11px 16px", fontSize: 12.5, color: "rgba(255,255,255,0.5)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.company ?? "—"}</td>
-                      <td style={{ padding: "11px 16px" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>
+                      <td data-label="Company" style={{ padding: "11px 16px", fontSize: 12.5, color: "rgba(255,255,255,0.5)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.company ?? "—"}</td>
+                      <td data-label="Status" style={{ padding: "11px 16px" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>
                         {pill ? <span style={{ display: "inline-flex", padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 500, background: pill.bg, color: pill.color, border: `1px solid ${pill.border}` }}>{lead.status.replace(/_/g, " ")}</span> : lead.status}
                       </td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: "rgba(74,222,128,0.85)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.systemInterest ? systemTypeLabel[lead.systemInterest] : "—"}</td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: "rgba(255,255,255,0.4)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.source ?? "—"}</td>
-                      <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.7)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.estimatedValue > 0 ? `$${lead.estimatedValue.toLocaleString()}` : "—"}</td>
-                      <td style={{ padding: "11px 16px" }} onClick={() => { setEditing(lead); setModalOpen(true); }}><span style={{ fontSize: 12, color: "rgba(22,163,74,0.7)" }}>Edit →</span></td>
+                      <td data-label="System" style={{ padding: "11px 16px", fontSize: 12, color: "rgba(74,222,128,0.85)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.systemInterest ? systemTypeLabel[lead.systemInterest] : "—"}</td>
+                      <td data-label="Source" style={{ padding: "11px 16px", fontSize: 12, color: "rgba(255,255,255,0.4)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.source ?? "—"}</td>
+                      <td data-label="Value" style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.7)" }} onClick={() => { setEditing(lead); setModalOpen(true); }}>{lead.estimatedValue > 0 ? `$${lead.estimatedValue.toLocaleString()}` : "—"}</td>
+                      <td data-label="" style={{ padding: "11px 16px" }} onClick={() => { setEditing(lead); setModalOpen(true); }}><span style={{ fontSize: 12, color: "rgba(22,163,74,0.7)" }}>Edit →</span></td>
                     </tr>
                   );
                 })}

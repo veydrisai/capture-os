@@ -65,7 +65,7 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
 
   return (
     <div className="animate-fade-up">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "white", letterSpacing: "-0.03em" }}>Contacts</h1>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 2 }}>{contacts.length} total contacts</p>
@@ -84,12 +84,12 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search contacts..."
-          style={{ width: "100%", maxWidth: 360, padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }}
+          style={{ width: "100%", maxWidth: "100%", padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }}
         />
       </div>
 
       <div className="glass" style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
+        <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <th style={{ padding: "12px 12px 12px 16px", width: 36 }}>
@@ -121,10 +121,10 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
                 onClick={() => { setEditing(contact); setModalOpen(true); }}
                 style={{ borderBottom: i < filtered.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", cursor: "pointer", background: isSelected ? "rgba(22,163,74,0.07)" : undefined }}
               >
-                <td style={{ padding: "12px 12px 12px 16px" }} onClick={(e) => toggleSelect(contact.id, e)}>
+                <td data-label="" style={{ padding: "12px 12px 12px 16px" }} onClick={(e) => toggleSelect(contact.id, e)}>
                   <input type="checkbox" checked={isSelected} onChange={() => {}} style={{ accentColor: "#22C55E", width: 14, height: 14, cursor: "pointer" }} />
                 </td>
-                <td style={{ padding: "12px 16px" }}>
+                <td data-label="Name" style={{ padding: "12px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #16A34A, #22C55E)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "white", flexShrink: 0 }}>
                       {contact.firstName[0]}{contact.lastName[0]}
@@ -132,29 +132,29 @@ export default function ContactsClient({ initialContacts }: { initialContacts: C
                     <span style={{ fontSize: 13, fontWeight: 500, color: "white" }}>{contact.firstName} {contact.lastName}</span>
                   </div>
                 </td>
-                <td style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{contact.company ?? "—"}</td>
-                <td style={{ padding: "12px 16px" }}>
+                <td data-label="Company" style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{contact.company ?? "—"}</td>
+                <td data-label="Email" style={{ padding: "12px 16px" }}>
                   {contact.email ? (
                     <a href={`mailto:${contact.email}`} onClick={(e) => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
                       <Mail size={12} /> {contact.email}
                     </a>
                   ) : <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 13 }}>—</span>}
                 </td>
-                <td style={{ padding: "12px 16px" }}>
+                <td data-label="Phone" style={{ padding: "12px 16px" }}>
                   {contact.phone ? (
                     <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
                       <Phone size={12} /> {contact.phone}
                     </span>
                   ) : <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 13 }}>—</span>}
                 </td>
-                <td style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{contact.title ?? "—"}</td>
-                <td style={{ padding: "12px 16px" }}>
+                <td data-label="Title" style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{contact.title ?? "—"}</td>
+                <td data-label="Type" style={{ padding: "12px 16px" }}>
                   <span className={`pill ${typeColors[contact.type] ?? "pill-new"}`}>{contact.type}</span>
                 </td>
-                <td style={{ padding: "12px 16px", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
+                <td data-label="Added" style={{ padding: "12px 16px", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
                   {formatDistanceToNow(new Date(contact.createdAt), { addSuffix: true })}
                 </td>
-                <td style={{ padding: "12px 16px" }}>
+                <td data-label="" style={{ padding: "12px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     {contact.email && (
                       <button

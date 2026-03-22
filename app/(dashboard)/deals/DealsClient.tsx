@@ -132,13 +132,13 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
       toolbar={
         <div style={{ position: "relative" }}>
           <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pipeline..." style={{ width: "100%", maxWidth: 360, padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pipeline..." style={{ width: "100%", maxWidth: "100%", padding: "9px 14px 9px 34px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "white", fontSize: 13, outline: "none" }} />
         </div>
       }
     >
       {/* ══ BOARD VIEW ══ */}
       {view === "board" && (
-        <BoardViewport columnCount={STAGES.length} minColWidth={240} maxColWidth={340}>
+        <BoardViewport columnCount={STAGES.length} minColWidth={200} maxColWidth={340}>
           {STAGES.map((stage) => {
             const stageDeals = filtered.filter((d) => d.stage === stage.key);
             const total = stageDeals.reduce((s, d) => s + (d.value ?? 0), 0);
@@ -219,7 +219,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
       {/* ══ LIST VIEW ══ */}
       {view === "list" && (
         <div className="glass" style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 680 }}>
+          <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", minWidth: 680 }}>
             <thead>
               <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <th style={{ padding: "11px 12px 11px 16px", width: 36 }}>
@@ -243,21 +243,21 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
                     onMouseEnter={(e) => { if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = "rgba(255,255,255,0.03)"; }}
                     onMouseLeave={(e) => { if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = "transparent"; }}
                   >
-                    <td style={{ padding: "11px 12px 11px 16px" }} onClick={(e) => toggleSelect(deal.id, e)}>
+                    <td data-label="" style={{ padding: "11px 12px 11px 16px" }} onClick={(e) => toggleSelect(deal.id, e)}>
                       <input type="checkbox" checked={isSelected} onChange={() => {}} style={{ accentColor: "#22C55E", width: 14, height: 14, cursor: "pointer" }} />
                     </td>
-                    <td style={{ padding: "12px 16px" }} onClick={() => openEdit(deal)}>
+                    <td data-label="Deal" style={{ padding: "12px 16px" }} onClick={() => openEdit(deal)}>
                       <p style={{ fontSize: 13, fontWeight: 600, color: "white", letterSpacing: "-0.01em" }}>{deal.title}</p>
                       {deal.agreementSignedAt && <span style={{ fontSize: 10.5, color: "#4ade80", fontWeight: 600 }}>✓ Signed</span>}
                     </td>
-                    <td style={{ padding: "12px 16px" }} onClick={() => openEdit(deal)}>
+                    <td data-label="Stage" style={{ padding: "12px 16px" }} onClick={() => openEdit(deal)}>
                       {pill && <span style={{ display: "inline-flex", padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 500, background: pill.bg, color: pill.color, border: `1px solid ${pill.border}` }}>{stage?.label ?? deal.stage}</span>}
                     </td>
-                    <td style={{ padding: "12px 16px", fontSize: 12, color: deal.systemType ? systemTypeColor[deal.systemType] : "rgba(255,255,255,0.25)" }} onClick={() => openEdit(deal)}>{deal.systemType ? systemTypeLabel[deal.systemType] : "—"}</td>
-                    <td style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }} onClick={() => openEdit(deal)}>{deal.setupFee > 0 ? formatCurrency(deal.setupFee) : "—"}</td>
-                    <td style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }} onClick={() => openEdit(deal)}>{deal.monthlyRetainer > 0 ? `${formatCurrency(deal.monthlyRetainer)}/mo` : "—"}</td>
-                    <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: stage?.color ?? "white" }} onClick={() => openEdit(deal)}>{deal.value > 0 ? formatCurrency(deal.value) : "—"}</td>
-                    <td style={{ padding: "12px 16px" }} onClick={() => openEdit(deal)}>
+                    <td data-label="System" style={{ padding: "12px 16px", fontSize: 12, color: deal.systemType ? systemTypeColor[deal.systemType] : "rgba(255,255,255,0.25)" }} onClick={() => openEdit(deal)}>{deal.systemType ? systemTypeLabel[deal.systemType] : "—"}</td>
+                    <td data-label="Setup" style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }} onClick={() => openEdit(deal)}>{deal.setupFee > 0 ? formatCurrency(deal.setupFee) : "—"}</td>
+                    <td data-label="MRR" style={{ padding: "12px 16px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }} onClick={() => openEdit(deal)}>{deal.monthlyRetainer > 0 ? `${formatCurrency(deal.monthlyRetainer)}/mo` : "—"}</td>
+                    <td data-label="Value" style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: stage?.color ?? "white" }} onClick={() => openEdit(deal)}>{deal.value > 0 ? formatCurrency(deal.value) : "—"}</td>
+                    <td data-label="Prob" style={{ padding: "12px 16px" }} onClick={() => openEdit(deal)}>
                       {deal.probability > 0 ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <div style={{ width: 48, height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 4, overflow: "hidden" }}>
@@ -277,7 +277,7 @@ export default function DealsClient({ initialDeals }: { initialDeals: Deal[] }) 
 
       {/* ══ BULK ACTION BAR ══ */}
       {selected.size > 0 && (
-        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: "rgba(10,18,8,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(34,197,94,0.35)", borderRadius: 16, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 8px 40px rgba(0,0,0,0.55)", zIndex: 200 }}>
+        <div className="bulk-action-bar-fixed" style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: "rgba(10,18,8,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(34,197,94,0.35)", borderRadius: 16, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 8px 40px rgba(0,0,0,0.55)", zIndex: 200 }}>
           <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>{selected.size} selected</span>
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.12)" }} />
           <button onClick={bulkDelete} style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
